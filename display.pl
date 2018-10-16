@@ -6,12 +6,17 @@ display_menu :- write('Choose the mode you want to play :'), nl,
                 write('3 - Watch Computer vs Computer '), nl,
                 write('4 - Credits '), nl, nl.
 
+pc_difficulty_read(Y) :- Y = 0 -> write('Difficulty Medium setted !');
+                         Y \= 0 -> write('Difficulty Hard setted !').
 
-
-gameOption1(X) :- X = 1 -> write('Option 1');
+gameOption1(X) :- X = 1 -> write('You selected Player vs Player game !'),
+                            nl, nl, write('Have a nice game ! '), nl;
                   X \= 1 -> gameOption2(X).
 
-gameOption2(X) :- X = 2 -> write('Option 2');
+gameOption2(X) :- X = 2 -> write('You selected Player vs Computer game !'),
+                            nl, nl, write('Please enter PC difficulty (0 for medium, 1 for hard)'),
+                            nl, write('Input: '), read(Y),
+                            pc_difficulty_read(Y);
                   X \= 2 -> gameOption3(X).
 
 gameOption3(X) :- X = 3 -> write('Option 3');
@@ -29,6 +34,8 @@ kl :- display_gameStart,
       write('Input: '),
       read(A),
       gameOption1(A).
+
+
 
 display_line(S) :-
         S1 is S-1,
