@@ -10,7 +10,7 @@ pc_difficulty_read(Y) :- Y = 0 -> write('Difficulty Medium setted !'),nl;
                          Y \= 0 -> write('Difficulty Hard setted !').
 
 gameOption1(X) :- X = 1 -> write('You selected Player vs Player game !'),
-                            nl, nl, write('Have a nice game ! '), nl;
+                            nl, nl, write('Have a nice game ! '), nl, hardcoded_board_init;
                   X \= 1 -> gameOption2(X).
 
 gameOption2(X) :- X = 2 -> write('You selected Player vs Computer game !'),
@@ -36,6 +36,9 @@ kl :- display_gameStart,
       gameOption1(A).
 
 
+	  
+	  
+	  
 
 display_line(S) :-
         S1 is S-1,
@@ -58,26 +61,52 @@ draw_line(_, Max, Max).
 draw_line(String, Position, Max) :-
         write(String),
         Position1 is Position+1,
-        not(not(draw_line(String, Position1, Max))).
-
+        draw_line(String, Position1, Max).
+		
 draw_board(_, Y, Y).
 draw_board(X, Y, Position) :-
 	Position1 is Position+1,
-	draw_line("_", 0, X),
+	draw_line('_ ', 0, X),
 	nl,
-	not(not(draw_board(X, Y, Position1))).
+	draw_board(X, Y, Position1).
 
+	
+draw_piece([Number|Colour]):-
+	append([Number|Colour], [A|B], [A|B]) -> write('   ');
+	write(Number),
+	write(Colour).
+	
+draw_line_even([]).
+draw_line_even([Head|Tail]):-
+	write('|'),
+	draw_piece(Head),
+	draw_line2([Tail|X], Position1, Max).
 
+board([
+	[[], [], [], []],
+	[[], [20,'b'], [20,'a'], []],
+	[[], [], [], []]]).
+
+draw_line_odd([Head|Tail]):-
+	append([Number|Colour], [A|B], [A|B]) -> write('+');
+	write('+---'),
+	append([Head|[]], [A|B], [Head, Tail]),
+	draw_line_odd([A|B]).
 
 draw_board(X, Y) :-
 	draw_board(X, Y, 0).
+	
+draw_board2([Head,Tail]) :-
+	draw_line_odd(Head).
 
+	
 nesimo(I, L, X):-
     Al is I-1,
     length(A, Al),
     append(A, [X|_], L).
 
-  hardcoded_board_init :- write('+---+---+---+---+'),nl,
+  hardcoded_board_init :-
+					 write('+---+---+---+---+'),nl,
                      write('|   |   |   |   |'),nl,
                      write('+---+---+---+---+'),nl,
                      write('|   |20b|20p|   |'),nl,
@@ -116,35 +145,3 @@ hardcoded_board_final :-  write('+---+---+---+---+---+---+---+---+---+'),nl,
                           write('+---+---+---+---+---+---+---+---+---+'),nl.
 
 
-                          %    +---+---+---+---+---+---+---+
-                          %    |   |   |   |   |   |   |   |
-                          %    +---+---+---+---+---+---+---+
-                          %    |   |   |   |   | 1b| 2p|   |
-                          %    +---+---+---+---+---+---+---+
-                          %    |   |   |16b|13p|   |   |   |
-                          %    +---+---+---+---+---+---+---+
-                          %    |   | 5p|   |   | 3b|   |   |
-                          %    +---+---+---+---+---+---+---+
-                          %    |   |   |   |   |   |   |   |
-                          %    +---+---+---+---+---+---+---+
-
-
-
- % +---+---+---+---+---+---+---+---+---+
- % |   |   |   |   |   |   |   |   |   |
- % +---+---+---+---+---+---+---+---+---+
- % |   | 2P|   | 1b| 3p|   |   |   |   |
- % +---+---+---+---+---+---+---+---+---+
- % |   |   | 4P| 2p| 1b| 3p| 1b|   |   |
- % +---+---+---+---+---+---+---+---+---+
- % |   |   |   | 3P| 2b| 2p|   | 3b|   |
- % +---+---+---+---+---+---+---+---+---+
- % |   |   |   |   | 1P| 6b| 3b|   |   |
- % +---+---+---+---+---+---+---+---+---+
- % |   |   |   |   |   |   | 3b|   |   |
- % +---+---+---+---+---+---+---+---+---+
- % |   |   |   |   |   |   |   |   |   |
- % +---+---+---+---+---+---+---+---+---+
-
-
-% draw_board(X, Y) :-
