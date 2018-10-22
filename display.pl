@@ -36,9 +36,9 @@ kl :- display_gameStart,
       gameOption1(A).
 
 
-	  
-	  
-	  
+
+
+
 
 display_line(S) :-
         S1 is S-1,
@@ -62,7 +62,7 @@ draw_line(String, Position, Max) :-
         write(String),
         Position1 is Position+1,
         draw_line(String, Position1, Max).
-		
+
 draw_board(_, Y, Y).
 draw_board(X, Y, Position) :-
 	Position1 is Position+1,
@@ -70,22 +70,40 @@ draw_board(X, Y, Position) :-
 	nl,
 	draw_board(X, Y, Position1).
 
-	
+
 draw_piece([Number|Colour]):-
 	append([Number|Colour], [A|B], [A|B]) -> write('   ');
 	write(Number),
 	write(Colour).
-	
+
 draw_line_even([]).
 draw_line_even([Head|Tail]):-
 	write('|'),
 	draw_piece(Head),
 	draw_line2([Tail|X], Position1, Max).
 
-board([
+initialBoard([
 	[[], [], [], []],
 	[[], [20,'b'], [20,'a'], []],
 	[[], [], [], []]]).
+
+intermediateBoard([
+  	[[], [], [], [] ,[], [], []],
+    [[], [], [],[], [1,'b'], [2,'p'], []],
+    [[], [], [16,'p'], [13,'p'] ,[], [], []],
+  	[[], [5,'p'], [], [] ,[3,'b'], [], []],
+    [[], [], [], [] ,[], [], []]]).
+
+finalBoard([
+      [[], [], [], [] ,[], [], [],[], []],
+      [[], [2,'P'], [], [1,'b'] ,[3,'p'], [], [],[], []],
+      [[], [], [4,'P'], [2,'p'] ,[1,'b'], [3,'p'], [1,'b'],[], []],
+      [[], [], [], [3,'P'] ,[2,'b'], [2,'b'], [],[3,'b'], []],
+      [[], [], [], [] ,[1,'P'], [6,'b'], [3,'b'],[], []],
+      [[], [], [], [] ,[], [], [3,'b'],[], []],
+      [[], [], [], [] ,[], [], [],[], []]]).
+
+
 
 draw_line_odd([Head|Tail]):-
 	append([Number|Colour], [A|B], [A|B]) -> write('+');
@@ -95,15 +113,19 @@ draw_line_odd([Head|Tail]):-
 
 draw_board(X, Y) :-
 	draw_board(X, Y, 0).
-	
+
 draw_board2([Head,Tail]) :-
 	draw_line_odd(Head).
 
-	
+
 nesimo(I, L, X):-
     Al is I-1,
     length(A, Al),
     append(A, [X|_], L).
+
+init :- write('_   _   _  _ '),nl,
+        write('_  20b 20p _ '),nl,
+        write('_   _   _  _ '),nl.
 
   hardcoded_board_init :-
 					 write('+---+---+---+---+'),nl,
@@ -143,5 +165,3 @@ hardcoded_board_final :-  write('+---+---+---+---+---+---+---+---+---+'),nl,
                           write('+---+---+---+---+---+---+---+---+---+'),nl,
                           write('|   |   |   |   |   |   |   |   |   |'),nl,
                           write('+---+---+---+---+---+---+---+---+---+'),nl.
-
-
