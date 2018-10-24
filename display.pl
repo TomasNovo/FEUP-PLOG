@@ -23,11 +23,11 @@ gameOption3(X) :- X = 3 -> write('Option 3');
                   X \= 3 -> gameOption4(X).
 
 gameOption4(X) :- X = 4 -> write('Game developed by : '), nl,
-                  write('- Joao Pedro Viveiros Franco'), nl,
-                  write('- Tomas Nuno Fernandes Novo'), nl;
+                           write('- Joao Pedro Viveiros Franco'), nl,
+                           write('- Tomas Nuno Fernandes Novo'), nl;
                   X \= 4 -> write('You have picked an invalid option !'), nl, nl,
-                  write('Please, input again !'), nl,nl,
-                  kl.
+                            write('Please, input again !'), nl,nl,
+                            kl.
 
 kl :- display_gameStart,
       display_menu, nl,
@@ -35,8 +35,33 @@ kl :- display_gameStart,
       read(A),
       gameOption1(A).
 
+initialBoard([
+      	[' _ '], [' _ '], [' _ '], [' A '],
+      	[' _ '], [20,'b'], [20,'a'], [' _ '],
+      	[' _ '], [' _ '], [' _ '], [' B ']
+        ]).
+
+draw_piece([H|T]):- write(H),
+                    draw_piece(T).
 
 
+print_line([]).
+print_line([H|T]):- T = [] -> write(H), print_line(T);
+                    T \= [] -> write(H),write('|'),print_line(T).
+
+printBoard([ ]).
+printBoard([H|T]) :-     print_line(H),
+                         nl,printBoard(T).
+
+
+printInitial(Tabuleiro) :-  initialBoard(Tabuleiro),
+                            printBoard(Tabuleiro).
+
+/*printHand([], _).
+printHand([H|T], N):- write(N), write('. '),
+                      convertValue(H), nl,
+                      N1 is N+1,
+                      printHand(T, N1).
 
 
 
@@ -151,7 +176,7 @@ hardcoded_board_intermediate:- write('+---+---+---+---+---+---+---+'),nl,
 
 
 hardcoded_board_final :-  write('+---+---+---+---+---+---+---+---+---+'),nl,
-                          write('|   |   |   |   |   |   |   |   |   |'),nl,
+                          write('|   | _ |   |   |   |   |   |   |   |'),nl,
                           write('+---+---+---+---+---+---+---+---+---+'),nl,
                           write('|   | 2P|   | 1b| 3p|   |   |   |   |'),nl,
                           write('+---+---+---+---+---+---+---+---+---+'),nl,
@@ -165,3 +190,4 @@ hardcoded_board_final :-  write('+---+---+---+---+---+---+---+---+---+'),nl,
                           write('+---+---+---+---+---+---+---+---+---+'),nl,
                           write('|   |   |   |   |   |   |   |   |   |'),nl,
                           write('+---+---+---+---+---+---+---+---+---+'),nl.
+*/
