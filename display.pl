@@ -1,3 +1,18 @@
+replace([_|T], 0, New, [New|T]).
+
+replace([H|T], Index, New, [H|R]) :-
+	I1 is Index - 1,
+	replace(T, I1, New, R).
+
+clear_console :-
+	clear_console(40), !.
+
+clear_console(0).
+
+clear_console(N) :-
+	nl, N1 is N - 1, clear_console(N1).
+
+
 display_gameStart :- write('Welcome to Knights Line !'), nl, nl.
 
 display_menu :- write('Choose the mode you want to play :'), nl,
@@ -24,7 +39,7 @@ gameOption3(X) :- X = 3 -> write('Option 3');
 
 gameOption4(X) :- X = 4 -> write('Game developed by : '), nl,
                            write('- Joao Pedro Viveiros Franco'), nl,
-                           write('- Tomas Nuno Fernandes Novo'), nl;
+                           write('- Tomas Nuno Fernandes Novo'), nl,nl;
                   X \= 4 -> write('You have picked an invalid option !'), nl, nl,
                             write('Please, input again !'), nl,nl,
                             kl.
@@ -35,27 +50,36 @@ kl :- display_gameStart,
       read(A),
       gameOption1(A).
 
-initialBoard([
-      	[' _ '], [' _ '], [' _ '], [' A '],
-      	[' _ '], [20,'b'], [20,'a'], [' _ '],
-      	[' _ '], [' _ '], [' _ '], [' B ']
-        ]).
 
-draw_piece([H|T]):- write(H),
-                    draw_piece(T).
+initialBoard([[[], [], [], [' A ']],
+      	[[], [20,'b'], [20,'p'], []],
+      	[[], [], [], [' B ']]]).
 
+draw_piece([]):-
+        write(' _ ').
+
+draw_piece([H|T]):-
+        write(H),
+        T \= [] -> draw_piece(T);
+        0 = 0.
+
+        
 
 print_line([]).
-print_line([H|T]):- T = [] -> write(H), print_line(T);
-                    T \= [] -> write(H),write('|'),print_line(T).
+print_line([H|T]):-
+        draw_piece(H),
+        T \= [] -> write('|'), print_line(T);
+        T = [] -> print_line(T).
 
 printBoard([ ]).
 printBoard([H|T]) :-     print_line(H),
                          nl,printBoard(T).
 
 
-printInitial(Tabuleiro) :-  initialBoard(Tabuleiro),
-                            printBoard(Tabuleiro).
+
+printInitial :-
+        initialBoard(Tabuleiro),
+        printBoard(Tabuleiro).
 
 /*printHand([], _).
 printHand([H|T], N):- write(N), write('. '),
