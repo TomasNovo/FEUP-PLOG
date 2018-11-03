@@ -1,3 +1,5 @@
+:- use_module(library(lists)).
+
 replace([_|T], 0, New, [New|T]).
 
 replace([H|T], Index, New, [H|R]) :-
@@ -25,7 +27,7 @@ pc_difficulty_read(Y) :- Y = 0 -> write('Difficulty Medium setted !'),nl;
                          Y \= 0 -> write('Difficulty Hard setted !').
 
 gameOption1(X) :- X = 1 -> write('You selected Player vs Player game !'),
-                            nl, nl, write('Have a nice game ! '), nl, hardcoded_board_init;
+                            nl, nl, write('Have a nice game ! '), nl, nl, make_game(_);
                   X \= 1 -> gameOption2(X).
 
 gameOption2(X) :- X = 2 -> write('You selected Player vs Computer game !'),
@@ -55,6 +57,22 @@ initialBoard([[[], [], [], [' A ']],
       	[[], [20,'b'], [20,'p'], []],
       	[[], [], [], [' B ']]]).
 
+
+addLines([H|T],N) :- length([H|T],N),
+					   				 N1 is N-1,
+						 			 	 addTail([H|T],[]),
+						 			 	 addLines([H|T],N1).
+
+
+append2([],Ys,Ys).
+append2([X|Xs],Ys,[X|Zs]):- append(Xs,Ys,Zs).
+
+/*Adicionar elementos na lista*/
+addHead([H|T],A) :- append2(A,[H|T],Zs).
+addTail([H|T],A) :- append2([H|T],A,Zs).
+
+
+
 draw_piece([]):-
         write(' _ ').
 
@@ -63,7 +81,7 @@ draw_piece([H|T]):-
         T \= [] -> draw_piece(T);
         0 = 0.
 
-        
+
 
 print_line([]).
 print_line([H|T]):-
@@ -80,6 +98,12 @@ printBoard([H|T]) :-     print_line(H),
 printInitial :-
         initialBoard(Tabuleiro),
         printBoard(Tabuleiro).
+
+make_game(C) :- 				printInitial,nl,nl,
+												write('Where do you wanna go ? A or B ?')
+												,read(C).
+
+
 
 /*printHand([], _).
 printHand([H|T], N):- write(N), write('. '),
