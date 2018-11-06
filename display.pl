@@ -1,4 +1,4 @@
-clear_console :-
+clear_console :- 
 	clear_console(40), !.
 
 clear_console(0).
