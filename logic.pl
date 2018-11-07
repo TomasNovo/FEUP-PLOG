@@ -1,3 +1,6 @@
+:- consult('utilities.pl'), use_module(library(lists)).
+
+
 display_gameStart :-
 	write('Welcome to Knights Line !'), nl, nl.
 
@@ -47,3 +50,43 @@ make_game(C) :-
 	printInitial,nl,nl,
 	write('Where do you wanna go ? A or B ?'),
 	read(C).
+
+makeMove([H|T], X1, Y1, X2, Y2, N2, X):-
+	length([H|T], Bl),
+	length(H, Ll),
+	X1 > -1, X1 < Ll, X2 > -1, X2 < Ll, Y1 > -1, Y1 < Bl, Y2 > -1, Y2 < Bl,
+	getPiece([H|T], 0, X1, Y1, Piece),
+	nth0(0, Piece, N1),
+	nth0(1, Piece, Colour),
+	nth0(Y1, [H|T], Line),
+	N is N1-N2,
+
+	N > 0, N2 > 0,
+
+	replace(Line, X1, [N, Colour], L),
+	replace([H|T], Y1, L, Foo),
+
+	nth0(Y2, [H|T], Line2),
+	replace(Line2, X2, [N2, Colour], L2),
+	replace(Foo, Y2, L2, X), !.
+
+getPiece([], _, _, _, _).
+getPiece([H|T], I, X, Y, Piece) :-
+	I = Y -> nth0(X, H, Piece);
+	I1 is I+1,
+	getPiece(T, I1, X, Y, Piece).
+
+
+addVerticalLines([], []).
+addVerticalLines([H|T], [H2|Tail]):-
+	addHead(H, [], Z),
+	addTail(Z, [], H2),
+	addVerticalLines(T, Tail).
+
+
+addHorizontalLines([H|T], Y) :-
+	append([H|T], [], X),
+	length(H, Hl),
+	createLine(W, Hl),
+	addHead(X, W, Z),
+	addTail(Z, W, Y).

@@ -12,21 +12,6 @@ initialBoard([[[], [], [], [' A ']],
 		[[], [], [], [' B ']]]).
 
 
-addVerticalLines([], []).
-addVerticalLines([H|T], [H2|Tail]):-
-	addHead(H, [], Z),
-	addTail(Z, [], H2),
-	addVerticalLines(T, Tail).
-
-
-addHorizontalLines([H|T], Y) :-
-	append([H|T], [], X),
-	length(H, Hl),
-	createLine(W, Hl),
-	addHead(X, W, Z),
-	addTail(Z, W, Y).
-
-
 createLine([], 0).
 createLine([H|T], I):-
 	I > 0,
@@ -42,7 +27,6 @@ addTail([H|T],A,Zs) :-
 	append([H|T],[A],Zs).
 
 
-
 draw_piece([]):-
 	write(' _ ').
 
@@ -50,7 +34,6 @@ draw_piece([H|T]):-
 	write(H),
 	T \= [] -> draw_piece(T);
 	0 = 0.
-
 
 
 print_line([]).
@@ -63,7 +46,6 @@ printBoard([ ]).
 printBoard([H|T]) :-
 	print_line(H),
 	nl,printBoard(T).
-
 
 
 printInitial :-
