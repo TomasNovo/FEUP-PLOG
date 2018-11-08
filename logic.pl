@@ -1,5 +1,13 @@
 :- consult('utilities.pl'), use_module(library(lists)).
 
+initialBoard([[[], [], [], [' A ']],
+			[[], [20,'b'], [20,'p'], []],
+			[[], [], [], [' B ']]]).
+
+testingBoard(X):-
+	initialBoard(Z),
+	addVerticalLines(Z, Y),
+	addHorizontalLines(Y, X).
 
 display_gameStart :-
 	write('Welcome to Knights Line !'), nl, nl.
@@ -46,9 +54,13 @@ kl :-
 	gameOptions(A).
 
 isWithinBounds([H|T], X, Y) :-
-	length([H|T], Bl),
-	length(H, Ll),
+	getBoardSize([H|T], Ll, Bl),
 	X >= 0, X < Ll, Y >= 0, Y < Bl.
+
+getBoardSize([H|T], X, Y):-
+	length(H, X),
+	length([H|T], Y).
+	
 
 make_game(C) :-
 	printInitial,nl,nl,
@@ -60,7 +72,7 @@ makeMove([H|T], X1, Y1, X2, Y2, N2, X):-
 	isWithinBounds([H|T], X2, Y2),
 	
 	getPiece([H|T], X1, Y1, Piece),
-	length(Piece1, 2),
+	length(Piece, 2),
 	getPiece([H|T], X2, Y2, Piece2),
 	length(Piece2, 0),
 
@@ -96,3 +108,65 @@ addHorizontalLines([H|T], Y) :-
 	addHead(X, W, Z),
 	addTail(Z, W, Y).
 
+
+getPieceMoves(Board, X, Y, Output):-
+	append([], [], Foobar),
+	X1 is X+1, Y1 is Y-2, %% Up-right
+	checkPieceMove(Board, X1, Y1, Foobar, Foobar2),
+	X2 is X+2, Y2 is Y-1, %% Right-up
+	checkPieceMove(Board, X2, Y2, Foobar2, Foobar3),
+	X3 is X+2, Y3 is Y+1, %% Right-down
+	checkPieceMove(Board, X3, Y3, Foobar3, Foobar4),
+	X4 is X+1, Y4 is Y+2, %% Down-right
+	checkPieceMove(Board, X4, Y4, Foobar4, Foobar5),
+	X5 is X-1, Y5 is Y+2, %% Down-left
+	checkPieceMove(Board, X5, Y5, Foobar5, Foobar6),
+	X6 is X-2, Y6 is Y+1, %% Left-down
+	checkPieceMove(Board, X6, Y6, Foobar6, Foobar7),
+	X7 is X-2, Y7 is Y-1, %% Left-up
+	checkPieceMove(Board, X7, Y7, Foobar7, Foobar8),
+	X8 is X-1, Y8 is Y-2, %% Up-left
+	checkPieceMove(Board, X8, Y8, Foobar8, Output).
+
+
+checkPieceMove(Board, X, Y, InputList, OutputList):-
+	checkAdjacent(Board, X, Y) ->
+		append(InputList, [[X, Y]], OutputList);
+
+		append(InputList, [], OutputList).
+
+checkAdjacent(Board, X, Y):-
+	getPiece(Board, X, Y, Piece),
+	nth0(1, Piece, Colour),
+	
+	X1 is X, Y1 is Y-1, %% Up
+	getPiece(Board, X1, Y1, Piece1),
+	nth0(1, Piece1, Colour1),
+
+	X2 is X+1, Y2 is Y-1, %% Up-right
+	getPiece(Board, X2, Y2, Piece2),
+	nth0(1, Piece2, Colour2),
+
+	X3 is X+1, Y3 is Y, %% Right
+	getPiece(Board, X3, Y3, Piece3),
+	nth0(1, Piece3, Colour3),
+
+	X4 is X+1, Y4 is Y+1, %% Down-right
+	getPiece(Board, X4, Y4, Piece4),
+	nth0(1, Piece4, Colour4),
+
+	X5 is X, Y5 is Y+1, %% Down
+	getPiece(Board, X5, Y5, Piece5),
+	nth0(1, Piece5, Colour5),
+
+	X6 is X-1, Y6 is Y+1, %% Down-left
+	getPiece(Board, X6, Y6, Piece6),
+	nth0(1, Piece6, Colour6),
+
+	X7 is X-1, Y7 is Y, %% Left
+	getPiece(Board, X7, Y7, Piece7),
+	nth0(1, Piece7, Colour7),
+
+	X8 is X-1, Y8 is Y-1, %% Up-left
+	getPiece(Board, X8, Y8, Piece8),
+	nth0(1, Piece8, Colour8).

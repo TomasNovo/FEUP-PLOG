@@ -7,11 +7,6 @@ clear_console(N) :-
 	nl, N1 is N - 1, clear_console(N1).
 
 
-initialBoard([[[], [], [], [' A ']],
-		[[], [20,'b'], [20,'p'], []],
-		[[], [], [], [' B ']]]).
-
-
 createLine([], 0).
 createLine([H|T], I):-
 	I > 0,
@@ -31,10 +26,21 @@ draw_piece([]):-
 	write(' _ ').
 
 draw_piece([H|T]):-
-	write(H),
-	T \= [] -> draw_piece(T);
-	0 = 0.
+	T = [] ->
+		write(H);
+	T \= [] ->
+		nth0(1, [H|T], Colour),
+		printPieceColour(H, Colour).
 
+
+printPieceColour(N, Colour):-
+		N @< 10 -> 
+			write(N),
+			write(' '),
+			write(Colour);
+		N @>= 10 -> 
+			write(N),
+			write(Colour).
 
 print_line([]).
 print_line([H|T]):-
