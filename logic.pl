@@ -45,6 +45,10 @@ kl :-
 	read(A),
 	gameOptions(A).
 
+isWithinBounds([H|T], X, Y) :-
+	length([H|T], Bl),
+	length(H, Ll),
+	X >= 0, X < Ll, Y >= 0, Y < Bl.
 
 make_game(C) :-
 	printInitial,nl,nl,
@@ -52,10 +56,14 @@ make_game(C) :-
 	read(C).
 
 makeMove([H|T], X1, Y1, X2, Y2, N2, X):-
-	length([H|T], Bl),
-	length(H, Ll),
-	X1 > -1, X1 < Ll, X2 > -1, X2 < Ll, Y1 > -1, Y1 < Bl, Y2 > -1, Y2 < Bl,
-	getPiece([H|T], 0, X1, Y1, Piece),
+	isWithinBounds([H|T], X1, Y1),
+	isWithinBounds([H|T], X2, Y2),
+	
+	getPiece([H|T], X1, Y1, Piece),
+	length(Piece1, 2),
+	getPiece([H|T], X2, Y2, Piece2),
+	length(Piece2, 0),
+
 	nth0(0, Piece, N1),
 	nth0(1, Piece, Colour),
 	nth0(Y1, [H|T], Line),
@@ -70,12 +78,9 @@ makeMove([H|T], X1, Y1, X2, Y2, N2, X):-
 	replace(Line2, X2, [N2, Colour], L2),
 	replace(Foo, Y2, L2, X), !.
 
-getPiece([], _, _, _, _).
-getPiece([H|T], I, X, Y, Piece) :-
-	I = Y -> nth0(X, H, Piece);
-	I1 is I+1,
-	getPiece(T, I1, X, Y, Piece).
-
+getPiece([H|T], X, Y, Piece) :-
+	nth0(Y, [H|T], Line),
+	nth0(X, Line, Piece).
 
 addVerticalLines([], []).
 addVerticalLines([H|T], [H2|Tail]):-
@@ -90,3 +95,4 @@ addHorizontalLines([H|T], Y) :-
 	createLine(W, Hl),
 	addHead(X, W, Z),
 	addTail(Z, W, Y).
+
