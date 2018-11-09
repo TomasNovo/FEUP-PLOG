@@ -1,7 +1,11 @@
 :- consult('utilities.pl'), use_module(library(lists)).
 
 initialBoard([[[], [], [], []],
-			[[], [20,'b'], [20,'p'], []],
+			[[], [20,'w'], [20,'b'], []],
+			[[], [], [], []]]).
+
+testBoard([[[], [], [], [5, 'w']],
+			[[], [15,'w'], [20,'b'], []],
 			[[], [], [], []]]).
 
 testingBoard(X):-
@@ -92,21 +96,17 @@ checkPieceMove(Board, X, Y, Colour, InputList, OutputList):-
 		append(InputList, [], OutputList).
 
 checkAdjacent(Board, X, Y, Colour):-
+	
+	getPiece(Board, X, Y, Piece),
+	length(Piece, 0),
 
 	X1 is X, Y1 is Y-1, %% Up
-
 	X2 is X+1, Y2 is Y-1, %% Up-right
-
 	X3 is X+1, Y3 is Y, %% Right
-
 	X4 is X+1, Y4 is Y+1, %% Down-right
-
 	X5 is X, Y5 is Y+1, %% Down
-
 	X6 is X-1, Y6 is Y+1, %% Down-left
-
 	X7 is X-1, Y7 is Y, %% Left
-
 	X8 is X-1, Y8 is Y-1, %% Up-left
 
 	(checkPieceColour(Board, X1, Y1, Colour);

@@ -1,1 +1,1 @@
-:- consult('logic.pl'), consult('menu.pl'), consult('display.pl').
+:- consult('menu.pl').
