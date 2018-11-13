@@ -20,7 +20,7 @@ pc_difficulty_read(Y) :-
 gameOptions(X) :-
 	X = 1 ->(write('You selected Player vs Player game !'),nl, nl,
 			write('Have a nice game ! '), nl, nl,
-			gameLoop() );
+			gameLoop );
 	X \= 1 -> (X = 2 ->(select_difficulty_pc);           
 		X \= 2 ->(X = 3 -> (write('Option 3'));                       
 			X \= 3 -> (X = 4 -> (write_credits);
@@ -51,36 +51,52 @@ movePrompt(Board, I, NewBoard) :-
 	P is mod(I, 2),
 	P = 0 -> 
 		write('Whites playing:'),nl,
-		playerMove(Board, I, 'w', NewBoard);
-	P = 1 ->
-		write('Blacks playing:'),nl,
-		playerMove(Board, I, 'b', NewBoard).
+		(playerMove(Board, I, 'w', NewBoard) -> 
+			true;
 
-playerMove(Board, I, Colour, NewBoard):-
+			invalidInput2('Invalid input!', Board, I, NewBoard));
+	(P = 1 ->
+		write('Blacks playing:'),nl,
+		(playerMove(Board, I, 'b', NewBoard) -> 
+			true;
+
+			invalidInput2('Invalid input!', Board, I, NewBoard))).
+
+
+invalidInput(Message, Board, I, Colour, NewBoard):-
+	write(Message),nl, playerMove(Board, I, Colour, NewBoard).
+
+invalidInput2(Message, Board, I, NewBoard):-
+	write(Message),nl, movePrompt(Board, I, NewBoard).
+
+
+playerMove(Board, Colour, NewBoard):-
 	nl,nl,write('Choose a stack to move (X,Y) : '),nl,
 	read(X),nl,
 	read(Y),nl,
-	getPiece(Board, X, Y, Piece),
-	nth0(1, Piece, PieceColour),
-	Colour = PieceColour ->
-		playerMove2(Board, I, X, Y, NewBoard);
-	Colour \= PieceColour ->
-		write('That piece belongs to the other player!'), nl,
-		playerMove(Board, I, Colour, NewBoard).
+	getPiece(Board, X, Y, Piece) ->(
+		getColour(Piece, PieceColour),
+		(Colour = PieceColour  -> 
+			playerMove2(Board, I, X, Y, NewBoard);
+		(PieceColour = '' ->
+				invalidInput('There is no piece at those coordinates!', Board, I, Colour, NewBoard);
 
-playerMove2(Board, I, X1, Y1, NewBoard):-
+				invalidInput('That piece belongs to the other player!', Board, I, Colour, NewBoard))));
+
+	invalidInput('Invalid input', Board, I, Colour, NewBoard).
+
+playerMove2(Board, X1, Y1, NewBoard):-
 	getPieceMoves(Board, X1, Y1, Moves),
 	showMoves(Board, Moves, BoardWithLetters),
 	printBoard(BoardWithLetters),nl,
 	write('Choose a position letter (or write 0 to cancel):'),nl,
 	read(P),
 	letter(P, Position),
-	
 	playerMove3(Board, X1, Y1, Position, Moves, NewBoard) -> 
 		true;
 %% else	
 		write('Incorrect input!'),nl,
-		playerMove2(Board, I, X1, Y1, NewBoard).
+		playerMove2(Board, X1, Y1, NewBoard).
 
 playerMove3(Board, X1, Y1, Position, Moves, NewBoard):-
 	nth0(Position, Moves, Move),
@@ -102,7 +118,7 @@ letter('H', 7).
 getLetter(I):-
 	I is Position.
 
-gameLoop():-
+gameLoop:-
 	I is 0,
 	initialBoard(Board),
 	gameLoop(Board, I).
@@ -111,3 +127,24 @@ gameLoop(Board, I):-
 	movePrompt(Board, I, NewBoard),
 	I1 is I+1,
 	gameLoop(NewBoard, I1).
+
+gameLoopBot:-
+	I is 0,
+	initialBoard(Board),
+	gameLoopBot(Board, I).
+
+gameLoopPlayerVsBot(Board, I):-
+	P is mod(I, 2),
+	(P = 0 ->
+		movePrompt(Board, I, NewBoard),
+		I1 is I+1,
+		gameLoopPlayerVsBot(NewBoard, I1);
+	(P = 1 ->
+		movePrompt(Board, I, NewBoard),
+		I1 is I+1,
+		gameLoopPlayerVsBot(NewBoard, I1))).
+	
+
+
+moveBot(Board, P, NewBoard):-
+	getPieces(Board, Player, Pieces).

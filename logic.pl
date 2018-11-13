@@ -50,6 +50,40 @@ getPiece([H|T], X, Y, Piece) :-
 	nth0(Y, [H|T], Line),
 	nth0(X, Line, Piece).
 
+
+getColour(Piece, Colour):-
+	length(Piece, L),
+	L = 0 ->
+		Colour = '';
+	(L = 2 -> 
+		nth0(1, Piece, Colour)).
+
+
+getPiecesLine([], _, _, _, Pieces, NewPieces):-
+	Pieces is NewPieces.
+
+getPiecesLine([H|T], Colour, X, Y, Pieces, NewPieces):-
+	getColour(H, PieceColour),
+	(PieceColour = Colour ->
+		append(Pieces, [[X,Y]], NewPieces);
+	(PieceColour \= Colour ->
+		append([], Pieces, NewPieces)));
+
+	X1 is X+1,
+	getPiecesLine(T, Colour, X1, Y, Pieces, NewPieces).
+
+
+getPiecesBoard([], _, _, _).
+getPiecesBoard([H|T], Colour, Y, Pieces):-
+	getPiecesLine(H, Colour, 0, Y, Pieces, NewPieces),
+	Y1 is Y+1,
+	getPiecesBoard(T, Colour, Y1, NewPieces).
+
+getPieces(Board, Colour, Pieces):-
+	append([], [], EmptyPieces),
+	getPiecesBoard(Board, Colour, 0, Pieces).
+
+
 addVerticalLines([], []).
 addVerticalLines([H|T], [H2|Tail]):-
 	addHead(H, [], Z),
