@@ -1,4 +1,4 @@
-:- consult('logic.pl'), consult('display.pl').
+:- consult('logic.pl'), consult('display.pl'), use_module(library(system)).
 
 display_gameStart :-
 	write('Welcome to Knights Line !'), nl, nl.
@@ -51,20 +51,53 @@ movePrompt(Board, I, NewBoard) :-
 	P is mod(I, 2),
 	P = 0 -> 
 		write('Whites playing:'),nl,
-		(playerMove(Board, I, 'w', NewBoard) -> 
+		(playerMove(Board, 'w', NewBoard) -> 
 			true;
 
 			invalidInput2('Invalid input!', Board, I, NewBoard));
 	(P = 1 ->
 		write('Blacks playing:'),nl,
-		(playerMove(Board, I, 'b', NewBoard) -> 
+		(playerMove(Board,'b', NewBoard) -> 
 			true;
 
 			invalidInput2('Invalid input!', Board, I, NewBoard))).
 
+moveBot(Board,I,NewBoard) :-
+	printBoard(Board,nl),
+	P is mod(I,2),
+	P = 0 -> 
+		write('Whites playing !'),nl,
+		botMove(Board,'w',NewBoard);
+	P = 1 -> write('Blacks playing !'),nl, botMove(Board,'b',NewBoard).
+
+botMove(Board, Colour, NewBoard):-
+	getBotMoves(Board, Colour, Moves),
+	length(Moves, MovesLength),
+	random(0, MovesLength, RandomIndex),
+	nth0(RandomIndex, Moves, Move),
+	nth0(0, Move, Piece1),
+	nth0(0, Piece1, X1),
+	nth0(1, Piece1, Y1),
+	nth0(1, Move, Piece2),
+	nth0(0, Piece2, X2),
+	nth0(1, Piece2, Y2),
+	getPiece(Board, X1, Y1, Piece),
+	getHeight(Piece, Height),
+	random(0, Height, RandomHeight),
+	makeMove(Board, X1, Y1, X2, Y2, RandomHeight, NewBoard).
+
+botMove2(Board, X1, Y1, Position, Moves, Height, NewBoard):-
+	nth0(Position, Moves, Move),
+	nth0(0, Move, X2),
+	nth0(1, Move, Y2),
+	random(0, Height, RandomHeight),
+	makeMove(Board, X1, Y1, X2, Y2, N, NewBoard).
+
+
+
 
 invalidInput(Message, Board, I, Colour, NewBoard):-
-	write(Message),nl, playerMove(Board, I, Colour, NewBoard).
+	write(Message),nl, playerMove(Board, Colour, NewBoard).
 
 invalidInput2(Message, Board, I, NewBoard):-
 	write(Message),nl, movePrompt(Board, I, NewBoard).
@@ -148,3 +181,19 @@ gameLoopPlayerVsBot(Board, I):-
 
 moveBot(Board, P, NewBoard):-
 	getPieces(Board, Player, Pieces).
+
+gameBotVsBot:-
+	write('Game Starting in: 3'),nl,
+	sleep(1),
+	write('Game Starting in: 2'),nl,
+	sleep(1),
+	write('Game Starting in: 1'),nl,
+	sleep(1),
+	I is 0,
+	initialBoard(Board),
+	gameLoopBotVsBot(Board,I).
+
+gameLoopBotVsBot(Board,I):-
+	P is mod(I,2),
+	(P = 0 -> write('Whites playing '), I1 is I+1,gameLoopBotVsBot(Board,I1);
+	(P \= 0-> write('Blacks playing '), I1 is I+1,gameLoopBotVsBot(Board,I1))).

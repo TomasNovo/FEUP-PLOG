@@ -51,12 +51,42 @@ getPiece([H|T], X, Y, Piece) :-
 	nth0(X, Line, Piece).
 
 
+getHeight(Piece, Height):-
+	length(Piece,L),
+	L = 0 ->
+		H = 0;
+	(L = 2 ->
+		nth0(0,Piece,Height)).
+
 getColour(Piece, Colour):-
 	length(Piece, L),
 	L = 0 ->
 		Colour = '';
 	(L = 2 -> 
 		nth0(1, Piece, Colour)).
+
+	
+% Iterates the moves list and makes the pairs
+getBotMoves2(_, _, [], OutList, OutList).
+getBotMoves2(X1, Y1, [H|T], InList, OutList):-
+	nth0(0, H, X2),
+	nth0(1, H, Y2),
+	append(InList, [[[X1,Y1],[X2,Y2]]], Foobar),
+	getBotMoves2(X1, Y1, T, Foobar, OutList).
+
+getBotMoves(_, [], OutList, OutList).
+getBotMoves(Board, [H|T], InList, OutList):-
+	nth0(0, H, X),
+	nth0(1, H, Y),	
+	getPieceMoves(Board, X, Y, Moves),
+	getBotMoves2(X, Y, Moves, Final, Foobar),
+	getBotMoves(Board, T, Foobar, OutList).
+
+% Gets the list of moves in [[[X1,Y1],[X2,Y2]]] form
+getBotMoves(Board, Colour, Moves):-
+	append([], [], EmptyList),
+	getPieces(Board, Colour, Pieces),
+	getBotMoves(Board, Pieces, EmptyList, Moves).
 
 
 getPiecesLine([], _, _, _, Pieces, Pieces).
