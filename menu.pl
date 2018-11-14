@@ -21,9 +21,13 @@ display_options :-
 	write('3 - Watch Computer vs Computer '), nl,
 	write('4 - Credits '), nl,
 	write('5 - Exit'),nl.
-
+   
 gameOptions(1):- write('You selected Player vs Player game !'),nl, nl,
-		   		 write('Have a nice game ! '), nl, nl, gameLoop.
+				 write('Instructions: '), nl,nl,
+				 write('- Enter the X and Y of the stack you want to move.'),nl,
+				 write('- Enter the letter of the move you can make according to the possibilities.'), nl,
+				 write('  Enter it in CAPS LOCK and bewtween '' '),
+		   		 write('Have a nice game ! '), nl, nl, countdown, nl, nl, gameLoop.
 gameOptions(2):- select_difficulty_pc.
 gameOptions(3):- write('Option 3').
 gameOptions(4):- write_credits.
@@ -49,14 +53,17 @@ wrong_input :- write('You have picked an invalid option !'),
 				nl, nl,  write('Please, input again !'),nl,nl.
 
 
+moveBot(Board, P, NewBoard):-
+	getPieces(Board, Player, Pieces).
 
+moveBot(Board,I,NewBoard,P):- 
+		(P = 0, 
+		write('Whites playing !'),nl,
+		botMove(Board,'w',NewBoard); (P = 1, write('Blacks playing !'),nl, botMove(Board,'b',NewBoard))).
 moveBot(Board,I,NewBoard) :-
 	printBoard(Board,nl),
 	P is mod(I,2),
-	P = 0 -> 
-		write('Whites playing !'),nl,
-		botMove(Board,'w',NewBoard);
-	P = 1 -> write('Blacks playing !'),nl, botMove(Board,'b',NewBoard).
+	moveBot(Board,I,NewBoard,P).
 
 botMove(Board, Colour, NewBoard):-
 	getBotMoves(Board, Colour, Moves),
@@ -106,8 +113,6 @@ movePrompt(Board, I, NewBoard) :-
 	movePrompt(Board, I, NewBoard, P).
 
 
-
-
 playerMoveAux(Board, X, Y, Colour, NewBoard, Piece, PieceColour):- 
 	( (Colour = PieceColour, playerMove2(Board, X, Y, NewBoard)) 
 	;
@@ -131,7 +136,6 @@ playerMove(Board, Colour, NewBoard):-
 	read(Y),nl,
 	playerMove(Board, Colour, X, Y, NewBoard).
 
-
 playerMove2(Board, X1, Y1, NewBoard):-
 	getPieceMoves(Board, X1, Y1, Moves),
 	showMoves(Board, Moves, BoardWithLetters),
@@ -139,11 +143,9 @@ playerMove2(Board, X1, Y1, NewBoard):-
 	write('Choose a position letter (or write 0 to cancel):'),nl,
 	read(P),
 	letter(P, Position),
-	playerMove3(Board, X1, Y1, Position, Moves, NewBoard) -> 
-		true;
-%% else	
-		write('Incorrect input!'),nl,
-		playerMove2(Board, X1, Y1, NewBoard).
+	(playerMove3(Board, X1, Y1, Position, Moves, NewBoard);
+	write('Incorrect input!'),nl,
+	playerMove2(Board, X1, Y1, NewBoard)).
 
 playerMove3(Board, X1, Y1, Position, Moves, NewBoard):-
 	nth0(Position, Moves, Move),
@@ -176,37 +178,36 @@ gameLoop(Board, I):-
 	I1 is I+1,
 	gameLoop(NewBoard, I1).
 
-%% gameLoopBot:-
-%% 	I is 0,
-%% 	initialBoard(Board),
-%% 	gameLoopBot(Board, I).
+gameLoopBot:-
+	I is 0,
+	initialBoard(Board),
+	gameLoopBot(Board, I).
 
-%% gameLoopPlayerVsBot(Board, I):-
-%% 	P is mod(I, 2),
-%% 	(P = 0 ->
-%% 		movePrompt(Board, I, NewBoard),
-%% 		I1 is I+1,
-%% 		gameLoopPlayerVsBot(NewBoard, I1);
-%% 	(P = 1 ->
-%% 		movePrompt(Board, I, NewBoard),
-%% 		I1 is I+1,
-%% 		gameLoopPlayerVsBot(NewBoard, I1))).
+%gameLoopPlayerVsBot(Board, I, P):- .
+
+gameLoopPlayerVsBot(Board, I):-
+ 	P is mod(I, 2),
+ 	(P = 0 ->
+ 		movePrompt(Board, I, NewBoard),
+ 		I1 is I+1,
+ 		gameLoopPlayerVsBot(NewBoard, I1);
+ 	(P = 1 ->
+ 		movePrompt(Board, I, NewBoard),
+ 		I1 is I+1,
+ 		gameLoopPlayerVsBot(NewBoard, I1))).
 	
 
+countdown :-write('Game Starting in: 3'),nl,
+	sleep(1),
+	write('Game Starting in: 2'),nl,
+	sleep(1),
+	write('Game Starting in: 1'),nl.
 
-%% moveBot(Board, P, NewBoard):-
-%% 	getPieces(Board, Player, Pieces).
-
-%% gameBotVsBot:-
-%% 	write('Game Starting in: 3'),nl,
-%% 	sleep(1),
-%% 	write('Game Starting in: 2'),nl,
-%% 	sleep(1),
-%% 	write('Game Starting in: 1'),nl,
-%% 	sleep(1),
-%% 	I is 0,
-%% 	initialBoard(Board),
-%% 	gameLoopBotVsBot(Board,I).
+gameBotVsBot:-
+	countdown,
+	I is 0,
+	initialBoard(Board),
+	gameLoopBotVsBot(Board,I).
 
 %% gameLoopBotVsBot(Board,I):-
 %% 	P is mod(I,2),
