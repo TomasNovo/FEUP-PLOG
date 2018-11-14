@@ -1,32 +1,28 @@
 :- consult('utilities.pl'), use_module(library(lists)).
 
-%Starting Board
 initialBoard([[[], [], [], []],
 			[[], [20,'w'], [20,'b'], []],
 			[[], [], [], []]]).
 
-%Board for tests
 testBoard([[[], [], [], [5, 'w']],
 			[[], [15,'w'], [20,'b'], []],
 			[[], [], [], []]]).
 
-%Tests Board (constantly changing)
 testingBoard(X):-
 	initialBoard(Z),
 	addVerticalLines(Z, Y),
 	addHorizontalLines(Y, X).
 
-%Checks if piece is out of table
+
 isWithinBounds([H|T], X, Y) :-
 	getBoardSize([H|T], Ll, Bl),
 	X >= 0, X < Ll, Y >= 0, Y < Bl.
 
-%Gets Board size
 getBoardSize([H|T], X, Y):-
 	length(H, X),
 	length([H|T], Y).
 
-%Makes a move
+
 makeMove([H|T], X1, Y1, X2, Y2, N2, X):-
 	isWithinBounds([H|T], X1, Y1),
 	isWithinBounds([H|T], X2, Y2),
@@ -50,28 +46,26 @@ makeMove([H|T], X1, Y1, X2, Y2, N2, X):-
 	replace(Line2, X2, [N2, Colour], L2),
 	replace(Foo, Y2, L2, X), !.
 
-%Gets Height
 getPiece([H|T], X, Y, Piece) :-
 	nth0(Y, [H|T], Line),
 	nth0(X, Line, Piece).
 
+
 %Gets piece Height
+getHeight(Piece, Height, 0) :- H = 0.
+getHeight(Piece, Height,2) :- nth0(0, Piece).
 getHeight(Piece, Height):-
-	length(Piece,L),
-	L = 0 ->
-		H = 0;
-	(L = 2 ->
-		nth0(0,Piece,Height)).
+	length(Piece, L),
+	getHeight(Piece, Height, L).
 
 %Gets piece colour
+getColour(Piece, Colour, 0):- Colour = ''.
+getColour(Piece, Colour, 2):- nth0(1, Piece, Colour).
 getColour(Piece, Colour):-
 	length(Piece, L),
-	L = 0 ->
-		Colour = '';
-	(L = 2 -> 
-		nth0(1, Piece, Colour)).
+	getColour(Piece, Colour, L).
 
-	
+
 % Iterates the moves list and makes the pairs
 getBotMoves2(_, _, [], OutList, OutList).
 getBotMoves2(X1, Y1, [H|T], InList, OutList):-
@@ -94,18 +88,20 @@ getBotMoves(Board, Colour, Moves):-
 	getPieces(Board, Colour, Pieces),
 	getBotMoves(Board, Pieces, EmptyList, Moves).
 
+getPiecesLine([H|T], Colour, Colour, X, Y, Pieces, NewPieces):-
+	append(Pieces, [[X,Y]], Foobar),
+	X1 is X+1,
+	getPiecesLine(T, Colour, X1, Y, Foobar, NewPieces).
+
+getPiecesLine([H|T], Colour, PieceColour, X, Y, Pieces, NewPieces):-
+	append([], Pieces, Foobar), 
+	X1 is X+1,
+	getPiecesLine(T, Colour, X1, Y, Foobar, NewPieces).
 
 getPiecesLine([], _, _, _, Pieces, Pieces).
 getPiecesLine([H|T], Colour, X, Y, Pieces, NewPieces):-
 	getColour(H, PieceColour),
-	(PieceColour = Colour ->
-		append(Pieces, [[X,Y]], Foobar),
-		X1 is X+1,
-		getPiecesLine(T, Colour, X1, Y, Foobar, NewPieces);
-	(PieceColour \= Colour ->
-		append([], Pieces, Foobar), 
-		X1 is X+1,
-		getPiecesLine(T, Colour, X1, Y, Foobar, NewPieces))).
+	getPiecesLine([H|T], Colour, PieceColour, Y, Pieces, NewPieces).
 
 getPiecesBoard([], _, _, Pieces, Pieces).
 getPiecesBoard([H|T], Colour, Y, EmptyPieces, Pieces):-
@@ -113,12 +109,11 @@ getPiecesBoard([H|T], Colour, Y, EmptyPieces, Pieces):-
 	Y1 is Y+1,
 	getPiecesBoard(T, Colour, Y1, NewPieces, Pieces).
 
-%Gets piece 
 getPieces(Board, Colour, Pieces):-
 	append([], [], EmptyPieces),
 	getPiecesBoard(Board, Colour, 0, EmptyPieces, Pieces).
 
-%Adds vertical line on first and last column of board.
+
 addVerticalLines([], []).
 addVerticalLines([H|T], [H2|Tail]):-
 	addHead(H, [], Z),
@@ -126,7 +121,6 @@ addVerticalLines([H|T], [H2|Tail]):-
 	addVerticalLines(T, Tail).
 
 
-%Adds horizontal line on first and last column of board.
 addHorizontalLines([H|T], Y) :-
 	append([H|T], [], X),
 	length(H, Hl),
@@ -134,7 +128,7 @@ addHorizontalLines([H|T], Y) :-
 	addHead(X, W, Z),
 	addTail(Z, W, Y).
 
-%Gets possible piece moves
+
 getPieceMoves(Board, X, Y, Output):-
 	append([], [], Foobar),
 
@@ -188,8 +182,50 @@ checkAdjacent(Board, X, Y, Colour):-
 	checkPieceColour(Board, X7, Y7, Colour);
 	checkPieceColour(Board, X8, Y8, Colour)).
 
-%Checks piece colour
 checkPieceColour(Board, X, Y, Colour):-
 	getPiece(Board, X, Y, Piece),
 	nth0(1, Piece, Colour1),
 	dif(Colour, Colour1).
+
+
+
+checkWin([H|T], Winner):-
+	length([H|T], BL),
+	length(H, Ll),
+	checkWinVertical(Board, 0, 0, Bl, Ll, Winner).
+
+
+
+
+
+checkWinVertical(Board, X, Y, Bl, Ll, Winner):-
+	Bl2 is Bl-3,
+	X < Ll,
+	Y < Bl2,
+	checkWinVertical(Board, X, Y, Bl, Ll, 'w', Winner);
+	checkWinVertical(Board, X, Y, Bl, Ll, 'b', Winner);
+	checkWinVertical(Board, X, Y, Bl, Ll, Winner).
+
+
+checkWinVertical(Board, X, Y, Bl, Ll, Colour, Winner):-
+	Y2 is Y+1,
+	Y3 is Y+2,
+	Y4 is Y+3,
+
+	getPiece(Board, X, Y, Piece1),
+	getColour(Piece1, Colour1),
+	Colour1 = Colour,
+
+	getPiece(Board, X, Y2, Piece2),
+	getColour(Piece2, Colour2),
+	Colour2 = Colour,
+
+	getPiece(Board, X, Y3, Piece3),
+	getColour(Piece3, Colour3),
+	Colour3 = Colour,
+
+	getPiece(Board, X, Y4, Piece4),
+	getColour(Piece4, Colour4),
+	Colour4 = Colour,
+
+	Winner is Colour.

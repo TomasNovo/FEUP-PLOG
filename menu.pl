@@ -50,23 +50,6 @@ wrong_input :- write('You have picked an invalid option !'),
 
 
 
-%Moves piece
-movePrompt(Board, I, NewBoard) :-
-	printBoard(Board),nl,
-	P is mod(I, 2),
-	P = 0 -> 
-		write('Whites playing:'),nl,
-		(playerMove(Board, 'w', NewBoard) -> 
-			true;
-
-			invalidInput2('Invalid input!', Board, I, NewBoard));
-	(P = 1 ->
-		write('Blacks playing:'),nl,
-		(playerMove(Board,'b', NewBoard) -> 
-			true;
-
-			invalidInput2('Invalid input!', Board, I, NewBoard))).
-
 moveBot(Board,I,NewBoard) :-
 	printBoard(Board,nl),
 	P is mod(I,2),
@@ -108,6 +91,21 @@ invalidInput2(Message, Board, I, NewBoard):-
 	write(Message),nl, movePrompt(Board, I, NewBoard).
 
 
+%Moves piece
+movePrompt(Board, I, NewBoard, 0):- 
+	write('Whites playing:'),nl,
+	( playerMove(Board,'w', NewBoard) ; invalidInput2('Invalid input!', Board, I, NewBoard)).
+
+movePrompt(Board, I, NewBoard, 1):- 
+	write('Blacks playing:'),nl,
+	( playerMove(Board,'b', NewBoard) ; invalidInput2('Invalid input!', Board, I, NewBoard)).
+
+movePrompt(Board, I, NewBoard) :-
+	printBoard(Board),nl,
+	P is mod(I, 2),
+	movePrompt(Board, I, NewBoard, P).
+
+
 playerMove(Board, Colour, NewBoard):-
 	nl,nl,write('Choose a stack to move (X,Y) : '),nl,
 	read(X),nl,
@@ -115,7 +113,7 @@ playerMove(Board, Colour, NewBoard):-
 	getPiece(Board, X, Y, Piece) ->(
 		getColour(Piece, PieceColour),
 		(Colour = PieceColour  -> 
-			playerMove2(Board, I, X, Y, NewBoard);
+			playerMove2(Board, X, Y, NewBoard);
 		(PieceColour = '' ->
 				invalidInput('There is no piece at those coordinates!', Board, I, Colour, NewBoard);
 
