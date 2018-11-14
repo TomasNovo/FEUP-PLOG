@@ -1,9 +1,20 @@
 :- consult('logic.pl'), consult('display.pl'), use_module(library(system)).
+ 
+%Start menu
+kl :-
+	display_gameStart,
+	display_options, nl,
+	write('Input: '),
+	read(A), nl,
+	A >= 1, A < 5, 
+	gameOptions(A).
 
+%Welcome player
 display_gameStart :-
 	write('Welcome to Knights Line !'), nl, nl.
 
-display_menu :-
+%Possible game options
+display_options :-
 	write('Choose the mode you want to play :'), nl,
 	write('1 - Player vs Player '), nl,
 	write('2 - Player vs Computer '), nl,
@@ -11,41 +22,35 @@ display_menu :-
 	write('4 - Credits '), nl,
 	write('5 - Exit'),nl.
 
-pc_difficulty_read(Y) :-
-	Y = 0 ->
-	  write('Difficulty Medium setted !'),nl;
-	Y \= 0 ->
-	  write('Difficulty Hard setted !').
- 
-gameOptions(X) :-
-	X = 1 ->(write('You selected Player vs Player game !'),nl, nl,
-			write('Have a nice game ! '), nl, nl,
-			gameLoop );
-	X \= 1 -> (X = 2 ->(select_difficulty_pc);           
-		X \= 2 ->(X = 3 -> (write('Option 3'));                       
-			X \= 3 -> (X = 4 -> (write_credits);
-				X \= 4 -> (X = 5 -> (write('Thank you, bye !'),nl,true);
-					X \= 5 -> (wrong_input,kl))))).
- 
-wrong_input :- write('You have picked an invalid option !'),
-					nl, nl,  write('Please, input again !'),nl,nl.
- 
+gameOptions(1):- write('You selected Player vs Player game !'),nl, nl,
+		   		 write('Have a nice game ! '), nl, nl, gameLoop.
+gameOptions(2):- select_difficulty_pc.
+gameOptions(3):- write('Option 3').
+gameOptions(4):- write_credits.
+gameOptions(5):- wrong_input, kl.
+
+%Option2 
 select_difficulty_pc :- write('You selected Player vs Computer game !'),
 							nl, nl, write('Please enter PC difficulty (0 for medium, 1 for hard)'),
-							nl, write('Input: '), read(Y),
+							nl, write('Input: '), read(Y),nl,
 							pc_difficulty_read(Y).
- 
-write_credits :- (write('Game developed by : '), nl,
-						write('- Joao Pedro Viveiros Franco'), nl,
-						write('- Tomas Nuno Fernandes Novo'), nl,nl).
- 
-kl :-
-	display_gameStart,
-	display_menu, nl,
-	write('Input: '),
-	read(A), nl,
-	gameOptions(A).
 
+%Option3
+pc_difficulty_read(0) :- write('Difficulty Medium setted !'),nl.
+pc_difficulty_read(1) :- write('Difficulty Hard setted !').
+
+%Option4 
+write_credits :- (write('Game developed by : '), nl,
+				  write('- Joao Pedro Viveiros Franco'), nl,
+				  write('- Tomas Nuno Fernandes Novo'), nl,nl).
+ 
+%Option5
+wrong_input :- write('You have picked an invalid option !'),
+				nl, nl,  write('Please, input again !'),nl,nl.
+
+
+
+%Moves piece
 movePrompt(Board, I, NewBoard) :-
 	printBoard(Board),nl,
 	P is mod(I, 2),
@@ -139,6 +144,7 @@ playerMove3(Board, X1, Y1, Position, Moves, NewBoard):-
 	read(N),
 	makeMove(Board, X1, Y1, X2, Y2, N, NewBoard).
 
+%Alphabet letters
 letter('A', 0).
 letter('B', 1).
 letter('C', 2).

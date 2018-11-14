@@ -1,28 +1,32 @@
 :- consult('utilities.pl'), use_module(library(lists)).
 
+%Starting Board
 initialBoard([[[], [], [], []],
 			[[], [20,'w'], [20,'b'], []],
 			[[], [], [], []]]).
 
+%Board for tests
 testBoard([[[], [], [], [5, 'w']],
 			[[], [15,'w'], [20,'b'], []],
 			[[], [], [], []]]).
 
+%Tests Board (constantly changing)
 testingBoard(X):-
 	initialBoard(Z),
 	addVerticalLines(Z, Y),
 	addHorizontalLines(Y, X).
 
-
+%Checks if piece is out of table
 isWithinBounds([H|T], X, Y) :-
 	getBoardSize([H|T], Ll, Bl),
 	X >= 0, X < Ll, Y >= 0, Y < Bl.
 
+%Gets Board size
 getBoardSize([H|T], X, Y):-
 	length(H, X),
 	length([H|T], Y).
 
-
+%Makes a move
 makeMove([H|T], X1, Y1, X2, Y2, N2, X):-
 	isWithinBounds([H|T], X1, Y1),
 	isWithinBounds([H|T], X2, Y2),
@@ -46,11 +50,12 @@ makeMove([H|T], X1, Y1, X2, Y2, N2, X):-
 	replace(Line2, X2, [N2, Colour], L2),
 	replace(Foo, Y2, L2, X), !.
 
+%Gets Height
 getPiece([H|T], X, Y, Piece) :-
 	nth0(Y, [H|T], Line),
 	nth0(X, Line, Piece).
 
-
+%Gets piece Height
 getHeight(Piece, Height):-
 	length(Piece,L),
 	L = 0 ->
@@ -58,6 +63,7 @@ getHeight(Piece, Height):-
 	(L = 2 ->
 		nth0(0,Piece,Height)).
 
+%Gets piece colour
 getColour(Piece, Colour):-
 	length(Piece, L),
 	L = 0 ->
@@ -107,11 +113,12 @@ getPiecesBoard([H|T], Colour, Y, EmptyPieces, Pieces):-
 	Y1 is Y+1,
 	getPiecesBoard(T, Colour, Y1, NewPieces, Pieces).
 
+%Gets piece 
 getPieces(Board, Colour, Pieces):-
 	append([], [], EmptyPieces),
 	getPiecesBoard(Board, Colour, 0, EmptyPieces, Pieces).
 
-
+%Adds vertical line on first and last column of board.
 addVerticalLines([], []).
 addVerticalLines([H|T], [H2|Tail]):-
 	addHead(H, [], Z),
@@ -119,6 +126,7 @@ addVerticalLines([H|T], [H2|Tail]):-
 	addVerticalLines(T, Tail).
 
 
+%Adds horizontal line on first and last column of board.
 addHorizontalLines([H|T], Y) :-
 	append([H|T], [], X),
 	length(H, Hl),
@@ -126,7 +134,7 @@ addHorizontalLines([H|T], Y) :-
 	addHead(X, W, Z),
 	addTail(Z, W, Y).
 
-
+%Gets possible piece moves
 getPieceMoves(Board, X, Y, Output):-
 	append([], [], Foobar),
 
@@ -180,6 +188,7 @@ checkAdjacent(Board, X, Y, Colour):-
 	checkPieceColour(Board, X7, Y7, Colour);
 	checkPieceColour(Board, X8, Y8, Colour)).
 
+%Checks piece colour
 checkPieceColour(Board, X, Y, Colour):-
 	getPiece(Board, X, Y, Piece),
 	nth0(1, Piece, Colour1),
