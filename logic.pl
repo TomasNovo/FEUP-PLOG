@@ -193,7 +193,7 @@ colourToNumber('n', 0).
 colourToNumber('w', 1).
 colourToNumber('b', 2).
 
-checkWin([H|T], Winner):-
+game_over([H|T], Winner):-
 	length([H|T], Bl),
 	length(H, Ll),
 
