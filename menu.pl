@@ -106,20 +106,31 @@ movePrompt(Board, I, NewBoard) :-
 	movePrompt(Board, I, NewBoard, P).
 
 
+
+
+playerMoveAux(Board, X, Y, Colour, NewBoard, Piece, PieceColour):- 
+	( (Colour = PieceColour, playerMove2(Board, X, Y, NewBoard)) 
+	;
+	( 
+		(PieceColour = '', invalidInput('There is no piece at those coordinates!', Board, I, Colour, NewBoard);
+		PieceColour \= '',invalidInput('That piece belongs to the other player!', Board, I, Colour, NewBoard)))).
+
+playerMove(Board, X, Y, Piece, Colour,NewBoard):- 
+	getColour(Piece, PieceColour), 
+	playerMoveAux(Board, X, Y, Colour, NewBoard, Piece, PieceColour).
+
+playerMove(Board, Colour, X, Y, NewBoard):- 
+	( 
+	( getPiece(Board,X,Y,Piece), playerMove(Board, X, Y, Piece, Colour, NewBoard) )
+	;
+	( invalidInput('Invalid input', Board, I, Colour, NewBoard))).
+
 playerMove(Board, Colour, NewBoard):-
 	nl,nl,write('Choose a stack to move (X,Y) : '),nl,
 	read(X),nl,
 	read(Y),nl,
-	getPiece(Board, X, Y, Piece) ->(
-		getColour(Piece, PieceColour),
-		(Colour = PieceColour  -> 
-			playerMove2(Board, X, Y, NewBoard);
-		(PieceColour = '' ->
-				invalidInput('There is no piece at those coordinates!', Board, I, Colour, NewBoard);
+	playerMove(Board, Colour, X, Y, NewBoard).
 
-				invalidInput('That piece belongs to the other player!', Board, I, Colour, NewBoard))));
-
-	invalidInput('Invalid input', Board, I, Colour, NewBoard).
 
 playerMove2(Board, X1, Y1, NewBoard):-
 	getPieceMoves(Board, X1, Y1, Moves),
@@ -165,39 +176,39 @@ gameLoop(Board, I):-
 	I1 is I+1,
 	gameLoop(NewBoard, I1).
 
-gameLoopBot:-
-	I is 0,
-	initialBoard(Board),
-	gameLoopBot(Board, I).
+%% gameLoopBot:-
+%% 	I is 0,
+%% 	initialBoard(Board),
+%% 	gameLoopBot(Board, I).
 
-gameLoopPlayerVsBot(Board, I):-
-	P is mod(I, 2),
-	(P = 0 ->
-		movePrompt(Board, I, NewBoard),
-		I1 is I+1,
-		gameLoopPlayerVsBot(NewBoard, I1);
-	(P = 1 ->
-		movePrompt(Board, I, NewBoard),
-		I1 is I+1,
-		gameLoopPlayerVsBot(NewBoard, I1))).
+%% gameLoopPlayerVsBot(Board, I):-
+%% 	P is mod(I, 2),
+%% 	(P = 0 ->
+%% 		movePrompt(Board, I, NewBoard),
+%% 		I1 is I+1,
+%% 		gameLoopPlayerVsBot(NewBoard, I1);
+%% 	(P = 1 ->
+%% 		movePrompt(Board, I, NewBoard),
+%% 		I1 is I+1,
+%% 		gameLoopPlayerVsBot(NewBoard, I1))).
 	
 
 
-moveBot(Board, P, NewBoard):-
-	getPieces(Board, Player, Pieces).
+%% moveBot(Board, P, NewBoard):-
+%% 	getPieces(Board, Player, Pieces).
 
-gameBotVsBot:-
-	write('Game Starting in: 3'),nl,
-	sleep(1),
-	write('Game Starting in: 2'),nl,
-	sleep(1),
-	write('Game Starting in: 1'),nl,
-	sleep(1),
-	I is 0,
-	initialBoard(Board),
-	gameLoopBotVsBot(Board,I).
+%% gameBotVsBot:-
+%% 	write('Game Starting in: 3'),nl,
+%% 	sleep(1),
+%% 	write('Game Starting in: 2'),nl,
+%% 	sleep(1),
+%% 	write('Game Starting in: 1'),nl,
+%% 	sleep(1),
+%% 	I is 0,
+%% 	initialBoard(Board),
+%% 	gameLoopBotVsBot(Board,I).
 
-gameLoopBotVsBot(Board,I):-
-	P is mod(I,2),
-	(P = 0 -> write('Whites playing '), I1 is I+1,gameLoopBotVsBot(Board,I1);
-	(P \= 0-> write('Blacks playing '), I1 is I+1,gameLoopBotVsBot(Board,I1))).
+%% gameLoopBotVsBot(Board,I):-
+%% 	P is mod(I,2),
+%% 	(P = 0 -> write('Whites playing '), I1 is I+1,gameLoopBotVsBot(Board,I1);
+%% 	(P \= 0-> write('Blacks playing '), I1 is I+1,gameLoopBotVsBot(Board,I1))).
