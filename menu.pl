@@ -1,12 +1,12 @@
 :- consult('logic.pl'), consult('display.pl'), use_module(library(system)).
- 
+
 %Start menu
 kl :-
+	clear_console(60),
 	display_gameStart,
-	display_options, nl,
+	display_options, nl,nl,nl,nl,nl,
 	write('Input: '),
-	read(A), nl,
-	A >= 1, A < 5, 
+	read(A), nl, 
 	gameOptions(A).
 
 %Welcome player
@@ -15,23 +15,33 @@ display_gameStart :-
 
 %Possible game options
 display_options :-
-	write('Choose the mode you want to play :'), nl,
-	write('1 - Player vs Player '), nl,
-	write('2 - Player vs Computer '), nl,
-	write('3 - Watch Computer vs Computer '), nl,
-	write('4 - Credits '), nl,
-	write('5 - Exit'),nl.
+	write('+--------------------------------------+'),nl,
+	write('| '),write('Choose the mode you want to play :'), write('   |'), nl,
+	write('|--------------------------------------|'),nl,
+	write('| '),write('1 - Player vs Player '), write('                |'),nl, 
+	write('|--------------------------------------|'),nl,
+	write('| '),write('2 - Player vs Computer '), write('              |'),nl,
+	write('|--------------------------------------|'),nl,
+	write('| '),write('3 - Watch Computer vs Computer '), write('      |'),nl,
+	write('|--------------------------------------|'),nl,
+	write('| '),write('4 - Credits '), write('                         |'), nl,
+	write('|--------------------------------------|'),nl,
+	write('| '),write('5 - Exit'), write('                             |'),nl,
+	write('+--------------------------------------+').
    
-gameOptions(1):- write('You selected Player vs Player game !'),nl, nl,
+gameOptions(1):- clear_console(60),
+				 write('You selected Player vs Player game !'),nl, nl,
 				 write('Instructions: '), nl,nl,
 				 write('- Enter the X and Y of the stack you want to move.'),nl,
 				 write('- Enter the letter of the move you can make according to the possibilities.'), nl,
-				 write('  Enter it in CAPS LOCK and bewtween '' '),
-		   		 write('Have a nice game ! '), nl, nl, countdown, nl, nl, gameLoop.
+				 write('  Enter it in CAPS LOCK and bewtween '' '' '), nl,nl,nl,nl,nl,nl,nl,nl,nl,
+				 sleep(3), clear_console(60),
+		   		 write('Have a nice game ! '), nl,nl,nl,nl,nl,nl,nl,nl,nl, countdown, nl, nl, clear_console(60), gameLoop.
 gameOptions(2):- select_difficulty_pc.
 gameOptions(3):- write('Option 3').
 gameOptions(4):- write_credits.
-gameOptions(5):- wrong_input, kl.
+gameOptions(5):- true.
+gameOptions(N):- write('Wrong input, please input again !'), kl.
 
 %Option2 
 select_difficulty_pc :- write('You selected Player vs Computer game !'),
@@ -60,6 +70,7 @@ moveBot(Board,I,NewBoard,P):-
 		(P = 0, 
 		write('Whites playing !'),nl,
 		botMove(Board,'w',NewBoard); (P = 1, write('Blacks playing !'),nl, botMove(Board,'b',NewBoard))).
+
 moveBot(Board,I,NewBoard) :-
 	printBoard(Board,nl),
 	P is mod(I,2),
@@ -89,14 +100,11 @@ botMove2(Board, X1, Y1, Position, Moves, Height, NewBoard):-
 	makeMove(Board, X1, Y1, X2, Y2, N, NewBoard).
 
 
-
-
 invalidInput(Message, Board, I, Colour, NewBoard):-
 	write(Message),nl, playerMove(Board, Colour, NewBoard).
 
 invalidInput2(Message, Board, I, NewBoard):-
 	write(Message),nl, movePrompt(Board, I, NewBoard).
-
 
 %Moves piece
 movePrompt(Board, I, NewBoard, 0):- 
@@ -169,6 +177,7 @@ getLetter(I):-
 	I is Position.
 
 gameLoop:-
+	write('KNIGHT LINE '), nl,nl,nl,
 	I is 0,
 	initialBoard(Board),
 	gameLoop(Board, I).
@@ -185,16 +194,16 @@ gameLoopBot:-
 
 %gameLoopPlayerVsBot(Board, I, P):- .
 
-gameLoopPlayerVsBot(Board, I):-
+gameLoopBot(Board, I):-
  	P is mod(I, 2),
  	(P = 0 ->
  		movePrompt(Board, I, NewBoard),
  		I1 is I+1,
- 		gameLoopPlayerVsBot(NewBoard, I1);
+ 		gameLoopBot(NewBoard, I1);
  	(P = 1 ->
  		movePrompt(Board, I, NewBoard),
  		I1 is I+1,
- 		gameLoopPlayerVsBot(NewBoard, I1))).
+ 		gameLoopVsBot(NewBoard, I1))).
 	
 
 countdown :-write('Game Starting in: 3'),nl,
