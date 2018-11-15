@@ -99,73 +99,91 @@ botMove2(Board, X1, Y1, Position, Moves, Height, NewBoard):-
 	makeMove(Board, X1, Y1, X2, Y2, N, NewBoard).
 
 
-invalidInput(Message, Board, I, Colour, NewBoard):-
-	write(Message),nl, playerMove(Board, Colour, NewBoard).
+invalidInput(Message, Board, Colour, I, NewBoard):-
+	write(Message),nl, playerMove(Board, Colour, I, NewBoard).
 
 invalidInput2(Message, Board, I, NewBoard):-
 	write(Message),nl, movePrompt(Board, I, NewBoard).
 
 %Moves piece
-movePrompt(Board, I, NewBoard, 0):- 
-	write('Whites playing:'),nl,
-	( playerMove(Board,'w', NewBoard) ; invalidInput2('Invalid input!', Board, I, NewBoard)).
-
-movePrompt(Board, I, NewBoard, 1):- 
-	write('Blacks playing:'),nl,
-	( playerMove(Board,'b', NewBoard) ; invalidInput2('Invalid input!', Board, I, NewBoard)).
-
 movePrompt(Board, I, NewBoard) :-
 	printBoard(Board),nl,
 	P is mod(I, 2),
 	movePrompt(Board, I, NewBoard, P).
 
-playerMove(Board, Colour, NewBoard):-
+movePrompt(Board, I, NewBoard, 0):- 
+	write('Whites playing:'),nl,
+	( playerMove(Board,'w', I, NewBoard) ; invalidInput2('Invalid input!', Board, I, NewBoard)).
+
+movePrompt(Board, I, NewBoard, 1):- 
+	write('Blacks playing:'),nl,
+	( playerMove(Board,'b', I, NewBoard) ; invalidInput2('Invalid input!', Board, I, NewBoard)).
+
+
+
+playerMove(Board, Colour, I, NewBoard):-
 	nl,nl,write('Choose a stack to move (X,Y) : '),nl,
 	read(X),nl,
 	read(Y),nl,
-	playerMove(Board, Colour, X, Y, NewBoard).
+	playerMove(Board, Colour, X, Y, I, NewBoard).
 
-playerMove(Board, Colour, X, Y, NewBoard):-
+playerMove(Board, Colour, X, Y, I, NewBoard):-
 	getPiece(Board, X, Y, Piece),
-	playerMove(Board, X, Y, Piece, Colour, NewBoard).
+	playerMove(Board, X, Y, Piece, Colour, I, NewBoard).
 
-playerMove(Board, Colour, X, Y, NewBoard):-
-	invalidInput('Invalid input', Board, I, Colour, NewBoard).
+playerMove(Board, Colour, X, Y, I, NewBoard):-
+	invalidInput('Invalid input', Board, Colour, I, NewBoard).
 
-playerMove(Board, X, Y, Piece, Colour,NewBoard):- 
+playerMove(Board, X, Y, Piece, Colour, I, NewBoard):- 
 	getColour(Piece, PieceColour), 
-	playerMoveAux(Board, X, Y, Colour, NewBoard, Piece, PieceColour).
+	playerMoveAux(Board, X, Y, Colour, I, NewBoard, Piece, PieceColour).
 
-playerMoveAux(Board, X, Y, Colour, NewBoard, Piece, PieceColour):- 
-	Colour = PieceColour,
-	playerMove2(Board, X, Y, NewBoard).
 
-playerMoveAux(Board, X, Y, Colour, NewBoard, Piece, PieceColour):- 
+playerMoveAux(Board, X, Y, Colour, I, NewBoard, Piece, PieceColour):- 
 	PieceColour = '',
-	invalidInput('There is no piece at those coordinates!', Board, I, Colour, NewBoard).
+	invalidInput('There is no piece at those coordinates!', Board, Colour, I, NewBoard).
 
-playerMoveAux(Board, X, Y, Colour, NewBoard, Piece, PieceColour):- 
+playerMoveAux(Board, X, Y, Colour, I, NewBoard, Piece, PieceColour):- 
+	getHeight(Piece, Height),
+	Height = 1,
+	invalidInput('The stack must have more than one piece!', Board, Colour, I, NewBoard).
+
+playerMoveAux(Board, X, Y, Colour, I, NewBoard, Piece, PieceColour):- 
+	Colour = PieceColour,
+	playerMove2(Board, X, Y, I, NewBoard).
+
+playerMoveAux(Board, X, Y, Colour, I, NewBoard, Piece, PieceColour):- 
 	PieceColour \= '',
-	invalidInput('That piece belongs to the other player!', Board, I, Colour, NewBoard).
+	invalidInput('That piece belongs to the other player!', Board, Colour, I, NewBoard).
 
-playerMove2(Board, X1, Y1, NewBoard):-
-	getPieceMoves(Board, X1, Y1, Moves),
+
+
+playerMove2(Board, X1, Y1, I, NewBoard):-
+	valid_moves(Board, X1, Y1, Moves),
 	showMoves(Board, Moves, BoardWithLetters),
 	printBoard(BoardWithLetters),nl,
 	write('Choose a position letter (or write 0 to cancel):'),nl,
 	read(P),
 	letter(P, Position),
-	(playerMove3(Board, X1, Y1, Position, Moves, NewBoard);
+	(playerMove3(Board, X1, Y1, Position, Moves, I, NewBoard);
 	write('Incorrect input!'),nl,
-	playerMove2(Board, X1, Y1, NewBoard)).
+	playerMove2(Board, X1, Y1, I, NewBoard)).
 
-playerMove3(Board, X1, Y1, Position, Moves, NewBoard):-
+playerMove3(Board, X1, Y1, Position, Moves, I, NewBoard):-
+	I \= 0,
 	nth0(Position, Moves, Move),
 	nth0(0, Move, X2),
 	nth0(1, Move, Y2),
 	write('Choose the number of pieces to move:'),nl,
 	read(N),
 	makeMove(Board, X1, Y1, X2, Y2, N, NewBoard).
+
+playerMove3(Board, X1, Y1, Position, Moves, I, NewBoard):-
+	I = 0,
+	nth0(Position, Moves, Move),
+	nth0(0, Move, X2),
+	nth0(1, Move, Y2),
+	makeMove(Board, X1, Y1, X2, Y2, 1, NewBoard).
 
 %Alphabet letters
 letter('A', 0).

@@ -4,7 +4,7 @@ initialBoard(	[[[], [], [], []],
 				[[], [20,'w'], [20,'b'], []],
 				[[], [], [], []]]).
 
-testBoard(	[[[5, 'w'], [], [], [5, 'w']],
+testBoard(	[[[1, 'w'], [], [], [5, 'w']],
 			[[1, 'b'], [15,'w'], [20,'b'], [3, 'b']],
 			[[3, 'b'], [3, 'w'], [3, 'w'], []],
 			[[3, 'b'], [4, 'w'], [], [7, 'b']],
@@ -16,9 +16,9 @@ testingBoard(X):-
 	addHorizontalLines(Y, X).
 
 
-isWithinBounds([H|T], X, Y) :-
-	getBoardSize([H|T], Ll, Bl),
-	X >= 0, X < Ll, Y >= 0, Y < Bl.
+isWithinBounds(Board, X, Y) :-
+	getBoardSize(Board, Width, Height),
+	X >= 0, X < Width, Y >= 0, Y < Height.
 
 getBoardSize([H|T], X, Y):-
 	length(H, X),
@@ -55,8 +55,8 @@ getPiece([H|T], X, Y, Piece) :-
 
 
 %Gets piece Height
-getHeight(Piece, Height, 0) :- H = 0.
-getHeight(Piece, Height,2) :- nth0(0, Piece).
+getHeight(Piece, Height, 0) :- Height = 0.
+getHeight(Piece, Height,2) :- nth0(0, Piece, Height).
 getHeight(Piece, Height):-
 	length(Piece, L),
 	getHeight(Piece, Height, L).
@@ -81,7 +81,7 @@ getBotMoves(_, [], OutList, OutList).
 getBotMoves(Board, [H|T], InList, OutList):-
 	nth0(0, H, X),
 	nth0(1, H, Y),
-	getPieceMoves(Board, X, Y, Moves),
+	valid_moves(Board, X, Y, Moves),
 	getBotMoves2(X, Y, Moves, Final, Foobar),
 	getBotMoves(Board, T, Foobar, OutList).
 
@@ -91,21 +91,22 @@ getBotMoves(Board, Colour, Moves):-
 	getPieces(Board, Colour, Pieces),
 	getBotMoves(Board, Pieces, EmptyList, Moves).
 
-getPiecesLine([], _, _, _, _, _, _).
-getPiecesLine([H|T], Colour, Colour, X, Y, Pieces, NewPieces):-
-	append(Pieces, [[X,Y]], Foobar),
-	X1 is X+1,
-	getPiecesLine(T, Colour, X1, Y, Foobar, NewPieces).
+getPiecesLine([H|T], Colour, PieceColour, X, Y, Pieces, NewPieces):-
+	Colour = PieceColour,
+	append(Pieces, [[X,Y]], NewPieces).
 
 getPiecesLine([H|T], Colour, PieceColour, X, Y, Pieces, NewPieces):-
-	append([], Pieces, Foobar), 
-	X1 is X+1,
-	getPiecesLine(T, Colour, X1, Y, Foobar, NewPieces).
+	Colour \= PieceColour,
+	append([], Pieces, NewPieces). 
+	
 
 getPiecesLine([], _, _, _, Pieces, Pieces).
 getPiecesLine([H|T], Colour, X, Y, Pieces, NewPieces):-
-	getColour(H, PC),
-	getPiecesLine([H|T], Colour, PieceColour, Y, Pieces, NewPieces).
+	getColour(H, PieceColour),
+	getPiecesLine([H|T], Colour, PieceColour, X, Y, Pieces, Foobar),
+
+	X1 is X+1,
+	getPiecesLine(T, Colour, X1, Y, Foobar, NewPieces).
 
 getPiecesBoard([], _, _, Pieces, Pieces).
 getPiecesBoard([H|T], Colour, Y, EmptyPieces, Pieces):-
@@ -118,11 +119,15 @@ getPieces(Board, Colour, Pieces):-
 	getPiecesBoard(Board, Colour, 0, EmptyPieces, Pieces).
 
 
-getPieceMoves(Board, X, Y, Output):-
+valid_moves(Board, X, Y, Output):-
 	append([], [], Foobar),
 
 	getPiece(Board, X, Y, Piece),
 	nth0(1, Piece, Colour),
+	getHeight(Piece, Height),
+
+	(Height > 1;
+	append([], [], Output)),
 
 	X1 is X+1, Y1 is Y-2, %% Up-right
 	checkPieceMove(Board, X1, Y1, Colour, Foobar, Foobar2),
@@ -180,9 +185,8 @@ colourToNumber('n', 0).
 colourToNumber('w', 1).
 colourToNumber('b', 2).
 
-game_over([H|T], Winner):-
-	length([H|T], Bl),
-	length(H, Ll),
+game_over(Board, Winner):-
+	getBoardSize(Board, Ll, Bl),
 
 	(checkWinVertical([H|T], 0, Bl, Ll, Winner);
 	checkWinHorizontal([H|T], 0, Bl, Ll, Winner);

@@ -8,9 +8,33 @@ clear_console(0).
 clear_console(N) :-
 	nl, N1 is N - 1, clear_console(N1).
 
+displayBar(Board):-
+	getBoardSize(Board, W, H),
+	I is 1,
+	write('  ___'),
+	displayBar(Board, W, I).
+
+displayBar([H|T], Width, N) :-
+	write('|___'),
+	(N1 is N + 1,
+	N1 @< Width,
+	displayBar([H|T], Width, N1);
+	true).
+
+displayX(Board):-
+	getBoardSize(Board, W, H),
+	I is 1,
+	write('   0 '),
+	displayX(Board, W, I).
+
+displayX([H|T], Width, N) :-
+	write('| '), write(N), write(' '),
+	(N1 is N + 1, 
+	N1 @< Width,
+	displayX([H|T], Width, N1);
+	true).
 
 alphabet([' A ', ' B ', ' C ', ' D ', ' E ', ' F ', ' G ', ' H ']).
-
 
 createLine([], 0).
 createLine([H|T], I):-
@@ -64,23 +88,39 @@ printPieceColourAux(N, Colour):-
 	write(Colour).
 
  printPieceColour(N, Colour):-
- 		 printPieceColourAux(N,Colour).
+ 	printPieceColourAux(N,Colour).
 
 print_line_aux([]):-
-	nl.
+	write('|'),nl.
 print_line_aux([H|T]):-
 	write('|').
 
 print_line([]).
 print_line([H|T]):-
+	T \= [],
 	draw_piece(H),
 	print_line_aux(T),
 	print_line(T).
 
-printBoard([]).
-printBoard([H|T]) :-
+print_line([H|T]):-
+	T = [],
+	draw_piece(H),
+	print_line_aux(T),
+	print_line(T).
+
+printBoard([], _).
+printBoard([H|T], I) :-
+	write(I),write('|'),
 	print_line(H),
-	printBoard(T).
+
+	I1 is I+1,
+	printBoard(T, I1).
+
+printBoard(Board):-
+	I is 0,
+	nl,displayX(Board),nl,
+	displayBar(Board),nl,
+	printBoard(Board, I).
 
 
 printInitial :-
