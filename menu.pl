@@ -1,4 +1,4 @@
-:- consult('logic.pl'), consult('display.pl'), use_module(library(system)).
+:- consult('logic.pl'), consult('display.pl'), use_module(library(system)), use_module(library(random)).
 
 %Start menu
 kl :-
@@ -15,18 +15,18 @@ display_gameStart :-
 
 %Possible game options
 display_options :-
-	write('+--------------------------------------+'),nl,
-	write('| '),write('Choose the mode you want to play :'), write('   |'), nl,
-	write('|--------------------------------------|'),nl,
-	write('| '),write('1 - Player vs Player '), write('                |'),nl, 
-	write('|--------------------------------------|'),nl,
-	write('| '),write('2 - Player vs Computer '), write('              |'),nl,
-	write('|--------------------------------------|'),nl,
-	write('| '),write('3 - Watch Computer vs Computer '), write('      |'),nl,
-	write('|--------------------------------------|'),nl,
-	write('| '),write('4 - Credits '), write('                         |'), nl,
-	write('|--------------------------------------|'),nl,
-	write('| '),write('5 - Exit'), write('                             |'),nl,
+	write('+--------------------------------------+'), nl,
+	write('| '),write('Choose the mode you want to play :   |'), nl,
+	write('|--------------------------------------|'), nl,
+	write('| '),write('1 - Player vs Player                 |'), nl, 
+	write('|--------------------------------------|'), nl,
+	write('| '),write('2 - Player vs Computer               |'), nl,
+	write('|--------------------------------------|'), nl,
+	write('| '),write('3 - Watch Computer vs Computer       |'), nl,
+	write('|--------------------------------------|'), nl,
+	write('| '),write('4 - Credits                          |'), nl,
+	write('|--------------------------------------|'), nl,
+	write('| '),write('5 - Exit                             |'), nl,
 	write('+--------------------------------------+').
    
 gameOptions(1):- clear_console(60),
@@ -37,7 +37,7 @@ gameOptions(1):- clear_console(60),
 				 write('  Enter it in CAPS LOCK and bewtween '' '' '), nl,nl,nl,nl,nl,nl,nl,nl,nl,
 				 sleep(3), clear_console(60),
 		   		 write('Have a nice game ! '), nl,nl,nl,nl,nl,nl,nl,nl,nl, countdown, nl, nl, clear_console(60), gameLoop.
-gameOptions(2):- select_difficulty_pc.
+gameOptions(2):- gameLoopPlayervsBot.
 gameOptions(3):- write('Option 3').
 gameOptions(4):- write_credits.
 gameOptions(5):- true.
@@ -62,19 +62,18 @@ write_credits :- (write('Game developed by : '), nl,
 wrong_input :- write('You have picked an invalid option !'),
 				nl, nl,  write('Please, input again !'),nl,nl.
 
+moveBot(Board, I, NewBoard) :-
+	printBoard(Board), nl,
+	P is mod(I, 2),
+	moveBot(Board, I, P, NewBoard).
 
-moveBot(Board, P, NewBoard):-
-	getPieces(Board, Player, Pieces).
+moveBot(Board, I, 0, NewBoard):- 
+	write('Whites playing !'),nl,
+	botMove(Board, 'w' ,NewBoard).
 
-moveBot(Board,I,NewBoard,P):- 
-		(P = 0, 
-		write('Whites playing !'),nl,
-		botMove(Board,'w',NewBoard); (P = 1, write('Blacks playing !'),nl, botMove(Board,'b',NewBoard))).
-
-moveBot(Board,I,NewBoard) :-
-	printBoard(Board,nl),
-	P is mod(I,2),
-	moveBot(Board,I,NewBoard,P).
+moveBot(Board, I, 1, NewBoard):- 
+	write('Blacks playing !'),nl,
+	botMove(Board, 'b', NewBoard).
 
 botMove(Board, Colour, NewBoard):-
 	getBotMoves(Board, Colour, Moves),
@@ -120,29 +119,34 @@ movePrompt(Board, I, NewBoard) :-
 	P is mod(I, 2),
 	movePrompt(Board, I, NewBoard, P).
 
-
-playerMoveAux(Board, X, Y, Colour, NewBoard, Piece, PieceColour):- 
-	( (Colour = PieceColour, playerMove2(Board, X, Y, NewBoard)) 
-	;
-	( 
-		(PieceColour = '', invalidInput('There is no piece at those coordinates!', Board, I, Colour, NewBoard);
-		PieceColour \= '',invalidInput('That piece belongs to the other player!', Board, I, Colour, NewBoard)))).
-
-playerMove(Board, X, Y, Piece, Colour,NewBoard):- 
-	getColour(Piece, PieceColour), 
-	playerMoveAux(Board, X, Y, Colour, NewBoard, Piece, PieceColour).
-
-playerMove(Board, Colour, X, Y, NewBoard):- 
-	( 
-	( getPiece(Board,X,Y,Piece), playerMove(Board, X, Y, Piece, Colour, NewBoard) )
-	;
-	( invalidInput('Invalid input', Board, I, Colour, NewBoard))).
-
 playerMove(Board, Colour, NewBoard):-
 	nl,nl,write('Choose a stack to move (X,Y) : '),nl,
 	read(X),nl,
 	read(Y),nl,
 	playerMove(Board, Colour, X, Y, NewBoard).
+
+playerMove(Board, Colour, X, Y, NewBoard):-
+	getPiece(Board, X, Y, Piece),
+	playerMove(Board, X, Y, Piece, Colour, NewBoard).
+
+playerMove(Board, Colour, X, Y, NewBoard):-
+	invalidInput('Invalid input', Board, I, Colour, NewBoard).
+
+playerMove(Board, X, Y, Piece, Colour,NewBoard):- 
+	getColour(Piece, PieceColour), 
+	playerMoveAux(Board, X, Y, Colour, NewBoard, Piece, PieceColour).
+
+playerMoveAux(Board, X, Y, Colour, NewBoard, Piece, PieceColour):- 
+	Colour = PieceColour,
+	playerMove2(Board, X, Y, NewBoard).
+
+playerMoveAux(Board, X, Y, Colour, NewBoard, Piece, PieceColour):- 
+	PieceColour = '',
+	invalidInput('There is no piece at those coordinates!', Board, I, Colour, NewBoard).
+
+playerMoveAux(Board, X, Y, Colour, NewBoard, Piece, PieceColour):- 
+	PieceColour \= '',
+	invalidInput('That piece belongs to the other player!', Board, I, Colour, NewBoard).
 
 playerMove2(Board, X1, Y1, NewBoard):-
 	getPieceMoves(Board, X1, Y1, Moves),
@@ -187,38 +191,34 @@ gameLoop(Board, I):-
 	I1 is I+1,
 	gameLoop(NewBoard, I1).
 
-gameLoopBot:-
+gameLoopPlayervsBot:-
 	I is 0,
 	initialBoard(Board),
-	gameLoopBot(Board, I).
+	gameLoopPlayervsBot(Board, I).
 
-%gameLoopPlayerVsBot(Board, I, P):- .
-
-gameLoopBot(Board, I):-
+gameLoopPlayervsBot(Board, I):-
  	P is mod(I, 2),
- 	(P = 0 ->
- 		movePrompt(Board, I, NewBoard),
- 		I1 is I+1,
- 		gameLoopBot(NewBoard, I1);
- 	(P = 1 ->
- 		movePrompt(Board, I, NewBoard),
- 		I1 is I+1,
- 		gameLoopVsBot(NewBoard, I1))).
+ 	gameLoopPlayervsBot(Board, I, P, NewBoard),
+
+ 	I1 is I+1,
+	gameLoopPlayervsBot(NewBoard, I1).
+
+gameLoopPlayervsBot(Board, I, 0, NewBoard):-
+	movePrompt(Board, I, NewBoard).
+
+gameLoopPlayervsBot(Board, I, 1, NewBoard):-
+	moveBot(Board, I, NewBoard).	
 	
 
 countdown :-write('Game Starting in: 3'),nl,
 	sleep(1),
 	write('Game Starting in: 2'),nl,
 	sleep(1),
-	write('Game Starting in: 1'),nl.
+	write('Game Starting in: 1'),nl,
+	sleep(1).
 
 gameBotVsBot:-
 	countdown,
 	I is 0,
 	initialBoard(Board),
 	gameLoopBotVsBot(Board,I).
-
-%% gameLoopBotVsBot(Board,I):-
-%% 	P is mod(I,2),
-%% 	(P = 0 -> write('Whites playing '), I1 is I+1,gameLoopBotVsBot(Board,I1);
-%% 	(P \= 0-> write('Blacks playing '), I1 is I+1,gameLoopBotVsBot(Board,I1))).

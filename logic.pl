@@ -46,7 +46,10 @@ makeMove([H|T], X1, Y1, X2, Y2, N2, X):-
 
 	nth0(Y2, [H|T], Line2),
 	replace(Line2, X2, [N2, Colour], L2),
-	replace(Foo, Y2, L2, X), !.
+	replace(Foo, Y2, L2, Foo2),
+
+	increaseBoard(Foo2, X2, Y2, X),
+	!.
 
 getPiece([H|T], X, Y, Piece) :-
 	nth0(Y, [H|T], Line),
@@ -54,14 +57,14 @@ getPiece([H|T], X, Y, Piece) :-
 
 
 %Gets piece Height
-getHeight(Piece, Height, 0) :- H = 0.
-getHeight(Piece, Height,2) :- nth0(0, Piece).
+getHeight(Piece, Height, 0) :- Height = 0.
+getHeight(Piece, Height, 2) :- nth0(0, Piece, Height).
 getHeight(Piece, Height):-
 	length(Piece, L),
 	getHeight(Piece, Height, L).
 
 %Gets piece colour
-getColour(Piece, Colour, 0):- Colour = 'n'.
+getColour(Piece, Colour, 0):- Colour = ''.
 getColour(Piece, Colour, 2):- nth0(1, Piece, Colour).
 getColour(Piece, Colour):-
 	length(Piece, L),
@@ -90,20 +93,19 @@ getBotMoves(Board, Colour, Moves):-
 	getPieces(Board, Colour, Pieces),
 	getBotMoves(Board, Pieces, EmptyList, Moves).
 
-getPiecesLine([H|T], Colour, Colour, X, Y, Pieces, NewPieces):-
+getPiecesLine([], _, _, _, Pieces, Pieces).
+getPiecesLine([H|T], Colour, X, Y, Pieces, NewPieces):-
+	getColour(H, Colour),
 	append(Pieces, [[X,Y]], Foobar),
 	X1 is X+1,
 	getPiecesLine(T, Colour, X1, Y, Foobar, NewPieces).
 
-getPiecesLine([H|T], Colour, PieceColour, X, Y, Pieces, NewPieces):-
+getPiecesLine([H|T], Colour, X, Y, Pieces, NewPieces):-
+	getColour(H, PieceColour),
+	Colour \= PieceColour,
 	append([], Pieces, Foobar), 
 	X1 is X+1,
 	getPiecesLine(T, Colour, X1, Y, Foobar, NewPieces).
-
-getPiecesLine([], _, _, _, Pieces, Pieces).
-getPiecesLine([H|T], Colour, X, Y, Pieces, NewPieces):-
-	getColour(H, PieceColour),
-	getPiecesLine([H|T], Colour, PieceColour, Y, Pieces, NewPieces).
 
 getPiecesBoard([], _, _, Pieces, Pieces).
 getPiecesBoard([H|T], Colour, Y, EmptyPieces, Pieces):-
@@ -114,21 +116,6 @@ getPiecesBoard([H|T], Colour, Y, EmptyPieces, Pieces):-
 getPieces(Board, Colour, Pieces):-
 	append([], [], EmptyPieces),
 	getPiecesBoard(Board, Colour, 0, EmptyPieces, Pieces).
-
-
-addVerticalLines([], []).
-addVerticalLines([H|T], [H2|Tail]):-
-	addHead(H, [], Z),
-	addTail(Z, [], H2),
-	addVerticalLines(T, Tail).
-
-
-addHorizontalLines([H|T], Y) :-
-	append([H|T], [], X),
-	length(H, Hl),
-	createLine(W, Hl),
-	addHead(X, W, Z),
-	addTail(Z, W, Y).
 
 
 getPieceMoves(Board, X, Y, Output):-
@@ -156,10 +143,11 @@ getPieceMoves(Board, X, Y, Output):-
 
 
 checkPieceMove(Board, X, Y, Colour, InputList, OutputList):-
-	checkAdjacent(Board, X, Y, Colour) ->
-		append(InputList, [[X, Y]], OutputList);
+	checkAdjacent(Board, X, Y, Colour),
+	append(InputList, [[X, Y]], OutputList).
 
-		append(InputList, [], OutputList).
+checkPieceMove(Board, X, Y, Colour, InputList, OutputList):-
+	append(InputList, [], OutputList).
 
 checkAdjacent(Board, X, Y, Colour):-
 	
@@ -290,41 +278,26 @@ checkFour(Board, X1, Y1, X2, Y2, X3, Y3, X4, Y4, Winner):-
 	checkFour(Board, X1, Y1, X2, Y2, X3, Y3, X4, Y4, 'b', Winner).
 
 checkFour(Board, X1, Y1, X2, Y2, X3, Y3, X4, Y4, Colour, Winner):-
-	%% write('X = '), write(X1),nl,
-	%% write('Y = '), write(Y1),nl,
-
 	colourToNumber(Colour, C),
-
-	%% write('C = '),write(C),nl,
 
 	getPiece(Board, X1, Y1, Piece1),
 	getColour(Piece1, Colour1),
 	colourToNumber(Colour1, C1),
 	C1 = C,
 
-	%% write('C1 = '),write(C1),nl,
-	%% write('Colour1 = '),write(Colour1),nl,
-	%% write('Piece1 = '),write(Piece1),nl,
-
 	getPiece(Board, X2, Y2, Piece2),
 	getColour(Piece2, Colour2),
 	colourToNumber(Colour2, C2),
 	C2 = C,
 	
-	%% write('C2 = '),write(C2),nl,
-
 	getPiece(Board, X3, Y3, Piece3),
 	getColour(Piece3, Colour3),
 	colourToNumber(Colour3, C3),
 	C3 = C,
 
-	%% write('C3 = '),write(C3),nl,
-
 	getPiece(Board, X4, Y4, Piece4),
 	getColour(Piece4, Colour4),
 	colourToNumber(Colour4, C4),
 	C4 = C,
-
-	%% write('C4 = '),write(C4),nl,
 	
 	Winner = Colour.
