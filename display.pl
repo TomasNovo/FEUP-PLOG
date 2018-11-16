@@ -11,7 +11,7 @@ clear_console(N) :-
 displayBar(Board):-
 	getBoardSize(Board, W, H),
 	I is 1,
-	write('  ___'),
+	write('   ___'),
 	displayBar(Board, W, I).
 
 displayBar([H|T], Width, N) :-
@@ -24,7 +24,7 @@ displayBar([H|T], Width, N) :-
 displayX(Board):-
 	getBoardSize(Board, W, H),
 	I is 1,
-	write('   0 '),
+	write('    0 '),
 	displayX(Board, W, I).
 
 displayX([H|T], Width, N) :-
@@ -110,7 +110,7 @@ print_line([H|T]):-
 
 printBoard([], _).
 printBoard([H|T], I) :-
-	write(I),write('|'),
+	write(I),write(' |'),
 	print_line(H),
 
 	I1 is I+1,
