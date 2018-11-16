@@ -17,3 +17,12 @@ addHead([H|T],A,Zs) :-
 %Appends on tail of list
 addTail([H|T],A,Zs) :-
 	append([H|T],[A],Zs).
+
+% Sets C to the max of [A,B]
+maximum(A, B, C):-
+	A > B,
+	C = A.
+
+maximum(A, B, C):-
+	A =< B,
+	C = B.

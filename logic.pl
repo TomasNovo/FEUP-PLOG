@@ -10,6 +10,12 @@ testBoard(	[[[1, 'w'], [], [], [5, 'w']],
 			[[3, 'b'], [4, 'w'], [], [7, 'b']],
 			[[8, 'w'], [7,  'b'], [], []]]).
 
+testBoard2(	[[[], [1, 'b'], [1, 'b'], []],
+			[[], [1, 'b'], [1, 'b'], []],
+			[[1, 'b'], [], [], []],
+			[[], [], [], []],
+			[[], [], [], []]]).
+
 testingBoard(X):-
 	initialBoard(Z),
 	addVerticalLines(Z, Y),
@@ -47,7 +53,7 @@ makeMove([H|T], X1, Y1, X2, Y2, N2, X):-
 	nth0(Y2, [H|T], Line2),
 	replace(Line2, X2, [N2, Colour], L2),
 	replace(Foo, Y2, L2, Foo2),
-	increaseBoard(Foo2, X2, Y2, X).
+	increaseBoard(Foo2, X).
 
 getPiece([H|T], X, Y, Piece) :-
 	nth0(Y, [H|T], Line),
@@ -56,13 +62,13 @@ getPiece([H|T], X, Y, Piece) :-
 
 %Gets piece Height
 getHeight(Piece, Height, 0) :- Height = 0.
-getHeight(Piece, Height,2) :- nth0(0, Piece, Height).
+getHeight(Piece, Height, 2) :- nth0(0, Piece, Height).
 getHeight(Piece, Height):-
 	length(Piece, L),
 	getHeight(Piece, Height, L).
 
 %Gets piece colour
-getColour(Piece, Colour, 0):- Colour = 'n'.
+getColour(Piece, Colour, 0):- Colour = ''.
 getColour(Piece, Colour, 2):- nth0(1, Piece, Colour).
 getColour(Piece, Colour):-
 	length(Piece, L),
@@ -181,17 +187,123 @@ checkPieceColour(Board, X, Y, Colour):-
 	nth0(1, Piece, Colour1),
 	dif(Colour, Colour1).
 
-colourToNumber('n', 0).
+colourToNumber('', 0).
 colourToNumber('w', 1).
 colourToNumber('b', 2).
+
+value(Board, Player, Value):-
+	getBoardSize(Board, Ll, Bl),
+
+	Max = 0,
+
+	valueVertical(Board, 0, Bl, Ll, Player, Max, Max2),
+	valueHorizontal(Board, 0, Bl, Ll, Player, Max2, Max3),
+	valueDownRight(Board, 0, Bl, Ll, Player, Max3, Max4),
+	valueDownLeft(Board, 0, Bl, Ll, Player, Max4, Value).
+
+valueVertical(_, Bl, Bl, _, _, Max, Max).
+valueVertical(Board, Y, Bl, Ll, Player, Max, NewMax):-
+
+	Y1 is Y+1,
+	valueVertical(Board, 0, Y, Bl, Ll, Player, Max, Max2),
+	valueVertical(Board, Y1, Bl, Ll, Player, Max2, NewMax).
+
+valueVertical(_, Ll, _, _, Ll, _, Max, Max).
+valueVertical(Board, X, Y, Bl, Ll, Player, Max, NewMax):-
+
+	Y1 is Y+1,
+	Y2 is Y+2,
+	Y3 is Y+3,
+
+	NewX is X+1,
+	valueCheckFour(Board, X, Y, X, Y1, X, Y2, X, Y3, Player, Max, Max2),
+	valueVertical(Board, NewX, Y, Bl, Ll, Player, Max2, NewMax).
+
+valueHorizontal(_, Bl, Bl, _, _, Max, Max).
+valueHorizontal(Board, Y, Bl, Ll, Player, Max, NewMax):-
+
+	Y1 is Y+1,
+	valueHorizontal(Board, 0, Y, Bl, Ll, Player, Max, Max2),
+	valueHorizontal(Board, Y1, Bl, Ll, Player, Max2, NewMax).
+
+valueHorizontal(_, Ll, _, _, Ll, _, Max, Max).
+valueHorizontal(Board, X, Y, Bl, Ll, Player, Max, NewMax):-
+
+	X1 is X+1,
+	X2 is X+2,
+	X3 is X+3,
+
+	NewX is X+1,
+	valueCheckFour(Board, X, Y, X1, Y, X2, Y, X3, Y, Player, Max, Max2),
+	valueHorizontal(Board, NewX, Y, Bl, Ll, Player, Max2, NewMax).
+
+valueDownRight(_, Bl, Bl, _, _, Max, Max).
+valueDownRight(Board, Y, Bl, Ll, Player, Max, NewMax):-
+
+	Y1 is Y+1,
+	valueDownRight(Board, 0, Y, Bl, Ll, Player, Max, Max2),
+	valueDownRight(Board, Y1, Bl, Ll, Player, Max2, NewMax).
+
+valueDownRight(_, Ll, _, _, Ll, _, Max, Max).
+valueDownRight(Board, X, Y, Bl, Ll, Player, Max, NewMax):-
+
+	X1 is X+1,
+	X2 is X+2,
+	X3 is X+3,
+	Y1 is Y+1,
+	Y2 is Y+2,
+	Y3 is Y+3,
+
+	NewX is X+1,
+	valueCheckFour(Board, X, Y, X1, Y1, X2, Y2, X3, Y3, Player, Max, Max2),
+	valueDownRight(Board, NewX, Y, Bl, Ll, Player, Max2, NewMax).
+
+valueDownLeft(_, Bl, Bl, _, _, Max, Max).
+valueDownLeft(Board, Y, Bl, Ll, Player, Max, NewMax):-
+
+	Y1 is Y+1,
+	valueDownLeft(Board, 0, Y, Bl, Ll, Player, Max, Max2),
+	valueDownLeft(Board, Y1, Bl, Ll, Player, Max2, NewMax).
+
+valueDownLeft(_, Ll, _, _, Ll, _, Max, Max).
+valueDownLeft(Board, X, Y, Bl, Ll, Player, Max, NewMax):-
+
+	X1 is X-1,
+	X2 is X-2,
+	X3 is X-3,
+	Y1 is Y+1,
+	Y2 is Y+2,
+	Y3 is Y+3,
+
+	NewX is X+1,
+	valueCheckFour(Board, X, Y, X1, Y1, X2, Y2, X3, Y3, Player, Max, Max2),
+	valueDownLeft(Board, NewX, Y, Bl, Ll, Player, Max2, NewMax).
+	
+
+valueCheckOne(Board, X, Y, Player, N, Max, NewMax):-
+	(\+((colourToNumber(Player, C),
+	getPiece(Board, X, Y, Piece),
+	getColour(Piece, Colour),
+	colourToNumber(Colour, C2),
+	C2 = C))), maximum(Max, N, NewMax).
+
+
+valueCheckFour(Board, X1, Y1, X2, Y2, X3, Y3, X4, Y4, Player, Max, NewMax):-
+
+	valueCheckOne(Board, X1, Y1, Player, 0, Max, NewMax);
+	valueCheckOne(Board, X2, Y2, Player, 1, Max, NewMax);
+	valueCheckOne(Board, X3, Y3, Player, 2, Max, NewMax);
+	valueCheckOne(Board, X4, Y4, Player, 3, Max, NewMax);
+	maximum(Max, 4, NewMax).
+
 
 game_over(Board, Winner):-
 	getBoardSize(Board, Ll, Bl),
 
-	(checkWinVertical([H|T], 0, Bl, Ll, Winner);
-	checkWinHorizontal([H|T], 0, Bl, Ll, Winner);
-	checkWinDownRight([H|T], 0, Bl, Ll, Winner);
-	checkWinDownLeft([H|T], 0, Bl, Ll, Winner)).
+	(checkWinVertical(Board, 0, Bl, Ll, Winner);
+	checkWinHorizontal(Board, 0, Bl, Ll, Winner);
+	checkWinDownRight(Board, 0, Bl, Ll, Winner);
+	checkWinDownLeft(Board, 0, Bl, Ll, Winner)).
 
 checkWinVertical(Board, Y, Bl, Ll, Winner):-
 	Bl2 is Bl-3,
@@ -281,41 +393,27 @@ checkFour(Board, X1, Y1, X2, Y2, X3, Y3, X4, Y4, Winner):-
 	checkFour(Board, X1, Y1, X2, Y2, X3, Y3, X4, Y4, 'b', Winner).
 
 checkFour(Board, X1, Y1, X2, Y2, X3, Y3, X4, Y4, Colour, Winner):-
-	%% write('X = '), write(X1),nl,
-	%% write('Y = '), write(Y1),nl,
 
 	colourToNumber(Colour, C),
-
-	%% write('C = '),write(C),nl,
 
 	getPiece(Board, X1, Y1, Piece1),
 	getColour(Piece1, Colour1),
 	colourToNumber(Colour1, C1),
 	C1 = C,
 
-	%% write('C1 = '),write(C1),nl,
-	%% write('Colour1 = '),write(Colour1),nl,
-	%% write('Piece1 = '),write(Piece1),nl,
-
 	getPiece(Board, X2, Y2, Piece2),
 	getColour(Piece2, Colour2),
 	colourToNumber(Colour2, C2),
 	C2 = C,
 	
-	%% write('C2 = '),write(C2),nl,
-
 	getPiece(Board, X3, Y3, Piece3),
 	getColour(Piece3, Colour3),
 	colourToNumber(Colour3, C3),
 	C3 = C,
-
-	%% write('C3 = '),write(C3),nl,
 
 	getPiece(Board, X4, Y4, Piece4),
 	getColour(Piece4, Colour4),
 	colourToNumber(Colour4, C4),
 	C4 = C,
 
-	%% write('C4 = '),write(C4),nl,
-	
 	Winner = Colour.

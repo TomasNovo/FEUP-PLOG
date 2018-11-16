@@ -139,8 +139,25 @@ showMoves(Board, [H|T], [H2|T2], Output):-
 	replaceByCoords(Board, X, Y, [H2], Foobar),
 	showMoves(Foobar, T, T2, Output).
 
+increaseBoard(Board, NewBoard):-
+	getBoardSize(Board, W, H),
+	increaseBoardY(Board, 0, W, H, NewBoard).
 
-increaseBoard(Board, X, Y, NewBoard):-
+increaseBoardY(Board, H, _, H, Board).
+increaseBoardY(Board, Y, W, H, NewBoard):-
+	increaseBoardX(Board, 0, Y, W, H, Board2),
+
+	Y1 is Y+1,
+	increaseBoardY(Board2, Y1, W, H, NewBoard).
+
+increaseBoardX(Board, W, _, W, _, Board).
+increaseBoardX(Board, X, Y, W, H, NewBoard):-
+	increaseBoard2(Board, X, Y, Board2),
+
+	X1 is X+1,
+	increaseBoardX(Board2, X1, Y, W, H, NewBoard).
+
+increaseBoard2(Board, X, Y, NewBoard):-
 	
 	getPiece(Board, X, Y, Piece),
 	getColour(Piece, Colour),
