@@ -1,6 +1,10 @@
 :- consult('logic.pl'), consult('display.pl'), use_module(library(system)), use_module(library(random)).
 
-%Start menu
+%%%%%%%%
+% MENU %
+%%%%%%%%
+
+% Starts menu and reads option
 kl :-
 	clear_console(60),
 	display_gameStart,
@@ -9,11 +13,11 @@ kl :-
 	read(A), nl, 
 	gameOptions(A).
 
-%Welcome player
+% Welcomes player
 display_gameStart :-
 	write('Welcome to Knights Line !'), nl, nl.
 
-%Possible game options
+% Displays possible game options
 display_options :-
 	write('+--------------------------------------+'), nl,
 	write('| '),write('Choose the mode you want to play :   |'), nl,
@@ -28,39 +32,56 @@ display_options :-
 	write('|--------------------------------------|'), nl,
 	write('| '),write('5 - Exit                             |'), nl,
 	write('+--------------------------------------+').
-   
+  
+% Sets option
 gameOptions(1):- clear_console(60),
 				 write('You selected Player vs Player game !'),nl, nl,
 				 write('Instructions: '), nl,nl,
 				 write('- Enter the X and Y of the stack you want to move.'),nl,
 				 write('- Enter the letter of the move you can make according to the possibilities.'), nl,
-				 write('  Enter it in CAPS LOCK and bewtween '' '' '), nl,nl,nl,nl,nl,nl,nl,nl,nl,
-				 sleep(3), clear_console(60),
-		   		 write('Have a nice game ! '), nl,nl,nl,nl,nl,nl,nl,nl,nl, countdown, nl, nl, clear_console(60), gameLoop.
+				 write('  Enter it in CAPS LOCK and between '' '' '), nl,nl,nl,nl,nl,nl,nl,nl,nl,
+				 %sleep(3), 
+				 %clear_console(60),
+		   		 write('Have a nice game ! '), nl,nl,nl,nl,nl,nl,nl,nl,nl, 
+		   		 %countdown, nl, nl, 
+		   		 clear_console(60), gameLoop.
 gameOptions(2):- gameLoopPlayervsBot.
 gameOptions(3):- write('Option 3').
 gameOptions(4):- write_credits.
 gameOptions(5):- true.
 gameOptions(N):- write('Wrong input, please input again !'), kl.
 
-%Option2 
+% Sets difficulty of Computer player
 select_difficulty_pc :- write('You selected Player vs Computer game !'),
 							nl, nl, write('Please enter PC difficulty (0 for medium, 1 for hard)'),
 							nl, write('Input: '), read(Y),nl,
 							pc_difficulty_read(Y).
 
-%Option3
 pc_difficulty_read(0) :- write('Difficulty Medium setted !'),nl.
 pc_difficulty_read(1) :- write('Difficulty Hard setted !').
 
-%Option4 
+% Displays credits of the game 
 write_credits :- (write('Game developed by : '), nl,
 				  write('- Joao Pedro Viveiros Franco'), nl,
 				  write('- Tomas Nuno Fernandes Novo'), nl,nl).
- 
-%Option5
-wrong_input :- write('You have picked an invalid option !'),
-				nl, nl,  write('Please, input again !'),nl,nl.
+
+% countdown fort game to start
+countdown :-write('Game Starting in: 3'),nl,
+	sleep(1),
+	write('Game Starting in: 2'),nl,
+	sleep(1),
+	write('Game Starting in: 1'),nl,
+	sleep(1). 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%%%%%%%%%%%%%%%%
+% Bot functions %
+%%%%%%%%%%%%%%%%%
+% Makes a move for computer player
+%  moveBot -> Makes a move for computer player according to colour and play number
+%  botMove -> Executes the move
 
 moveBot(Board, I, NewBoard) :-
 	printBoard(Board), nl,
@@ -146,13 +167,13 @@ botMove2(Board, Colour, NewBoard):-
 	write('RandomHeight = '),write(Height),nl,
 
 	makeMove(Board, X1, Y1, X2, Y2, RandomHeight, NewBoard).
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-invalidInput(Message, Board, Colour, I, NewBoard):-
-	write(Message),nl, playerMove(Board, Colour, I, NewBoard).
+%%%%%%%%%%%%%%%%%%%%%%
+%  Player functions  %
+%%%%%%%%%%%%%%%%%%%%%%
 
-invalidInput2(Message, Board, I, NewBoard):-
-	write(Message),nl, movePrompt(Board, I, NewBoard).
 
 %Moves piece
 movePrompt(Board, I, NewBoard) :-
@@ -169,6 +190,14 @@ movePrompt(Board, I, NewBoard, 1):-
 	( playerMove(Board,'b', I, NewBoard) ; invalidInput2('Invalid input!', Board, I, NewBoard)).
 
 
+% Makes the move of movePrompt, making test to check colour, possible plays and error inputs
+%  playerMove -> Chooses the stack to move by reading its (X,Y) coordinates
+%  playerMoveAux -> Handles inputs, checking invalid coordinates, nonexistent or not owned pieces , wrong colours
+%					and checks if the stack only has one piece , disallowing the move
+%  playerMove2 -> Displays possible movement options and chooses it , handling incorrect letter input and allowing
+%				  the user to return to the stack selector if he want to move another piece
+%  playerMove3 -> Moves the number of pieces inputed by the user,  allowing the user to return 
+%				  to the stack selector if he want to move another piece
 
 playerMove(Board, Colour, I, NewBoard):-
 	nl,nl,write('Choose a stack to move (X,Y) : '),nl,
@@ -199,35 +228,43 @@ playerMoveAux(Board, X, Y, Colour, I, NewBoard, Piece, PieceColour):-
 
 playerMoveAux(Board, X, Y, Colour, I, NewBoard, Piece, PieceColour):- 
 	Colour = PieceColour,
-	playerMove2(Board, X, Y, I, NewBoard).
+	playerMove2(Board, Colour, X, Y, I, NewBoard).
 
 playerMoveAux(Board, X, Y, Colour, I, NewBoard, Piece, PieceColour):- 
 	PieceColour \= '',
 	invalidInput('That piece belongs to the other player!', Board, Colour, I, NewBoard).
 
 
+returnToStackSelector('Z'), Board, Colour, I, NewBoard:-
+	write('cona').
+	
 
-playerMove2(Board, X1, Y1, I, NewBoard):-
+returnToStackSelector(P, Board, Colour, I, NewBoard):-
+	true.
+
+playerMove2(Board, Colour, X1, Y1, I, NewBoard):-
 	valid_moves(Board, X1, Y1, Moves),
 	showMoves(Board, Moves, BoardWithLetters),
 	printBoard(BoardWithLetters),nl,
-	write('Choose a position letter (or write 0 to cancel):'),nl,
-	read(P),
-	letter(P, Position),
-	(playerMove3(Board, X1, Y1, Position, Moves, I, NewBoard);
-	write('Incorrect input!'),nl,
-	playerMove2(Board, X1, Y1, I, NewBoard)).
+	write('Choose a position letter (or write ''Z'' to return to stack selector):'),nl,
+	read(P), 
+	( (letter(P, Position), playerMove3(Board, Colour, X1, Y1, Position, Moves, I, NewBoard));
+			(P = 'Z', movePrompt(Board, I, NewBoard));
+			write('Incorrect input!'),nl,
+			playerMove2(Board, Colour, X1, Y1, I, NewBoard)).
+	
 
-playerMove3(Board, X1, Y1, Position, Moves, I, NewBoard):-
+playerMove3(Board, Colour, X1, Y1, Position, Moves, I, NewBoard):-
 	I \= 0,
 	nth0(Position, Moves, Move),
 	nth0(0, Move, X2),
 	nth0(1, Move, Y2),
-	write('Choose the number of pieces to move:'),nl,
+	write('Choose the number of pieces to move (or write ''Z'' to return to stack selector):'),nl,
 	read(N),
-	makeMove(Board, X1, Y1, X2, Y2, N, NewBoard).
-
-playerMove3(Board, X1, Y1, Position, Moves, I, NewBoard):-
+	((N = 'Z', movePrompt(Board, I, NewBoard));
+	makeMove(Board, X1, Y1, X2, Y2, N, NewBoard)).
+			
+playerMove3(Board, Colour, X1, Y1, Position, Moves, I, NewBoard):-
 	I = 0,
 	nth0(Position, Moves, Move),
 	nth0(0, Move, X2),
@@ -246,6 +283,16 @@ letter('H', 7).
 
 getLetter(I):-
 	I is Position.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%%%%%%%
+% GAME %
+%%%%%%%%
+
+%gameLoop - Loop of the Player vs Player game according to number of plays
+%gameLoopPlayervsBot - Loop of the Player Vs Computer game according to number of plays
+%gameLoopBotVsBot - Loop of the Computer Vs Computer game according to number of plays
 
 gameLoop:-
 	write('KNIGHT LINE '), nl,nl,nl,
@@ -277,15 +324,22 @@ gameLoopPlayervsBot(Board, I, 1, NewBoard):-
 	moveBot(Board, I, NewBoard).	
 	
 
-countdown :-write('Game Starting in: 3'),nl,
-	sleep(1),
-	write('Game Starting in: 2'),nl,
-	sleep(1),
-	write('Game Starting in: 1'),nl,
-	sleep(1).
 
 gameBotVsBot:-
 	countdown,
 	I is 0,
 	initialBoard(Board),
 	gameLoopBotVsBot(Board,I).
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%%%%%%%%%%%%%%%%%
+% Input handling %
+%%%%%%%%%%%%%%%%%%
+
+% Handles incorrect inputs during game
+invalidInput(Message, Board, Colour, I, NewBoard):-
+	write(Message),nl, playerMove(Board, Colour, I, NewBoard).
+ invalidInput2(Message, Board, I, NewBoard):-
+	write(Message),nl, movePrompt(Board, I, NewBoard).
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
