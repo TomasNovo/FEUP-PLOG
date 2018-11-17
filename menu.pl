@@ -90,27 +90,40 @@ moveBot(Board, I, NewBoard) :-
 
 moveBot(Board, I, 0, NewBoard):- 
 	write('Whites playing !'),nl,
-	botMove2(Board, 'w' ,NewBoard).
+	choose_move(Board, 'w', Move),
+	makeMove(Board, Move, Height, NewBoard).
 
 moveBot(Board, I, 1, NewBoard):- 
 	write('Blacks playing !'),nl,
-	botMove2(Board, 'b', NewBoard).
+	choose_move(Board, 'b', Move, Height),
+	makeMove(Board, Move, Height, NewBoard).
 
-botMove(Board, Colour, NewBoard):-
+choose_move(Board, Level, Move, Height):-
+	getMovingPlayer(Board, Player),
+	choose_move(Board, Player, Level, Move, Height).
+
+choose_move(Board, Colour, 0, Move, Height):-
 	getBotMoves(Board, Colour, Moves),
+	
 	length(Moves, MovesLength),
 	random(0, MovesLength, RandomIndex),
 	nth0(RandomIndex, Moves, Move),
+
+	getPiece(Board, X1, Y1, Piece),
+	getHeight(Piece, H),
+	random(1, H, Height).
+
+choose_move(Board, Colour, 1, Move, Height):-
+	getBotMoves(Board, Colour, Moves),
+	getBiggestValueMove(Board, Moves, Colour, Move),
+
 	nth0(0, Move, Piece1),
 	nth0(0, Piece1, X1),
 	nth0(1, Piece1, Y1),
-	nth0(1, Move, Piece2),
-	nth0(0, Piece2, X2),
-	nth0(1, Piece2, Y2),
-	getPiece(Board, X1, Y1, Piece),
-	getHeight(Piece, Height),
-	random(1, Height, RandomHeight),
-	makeMove(Board, X1, Y1, X2, Y2, RandomHeight, NewBoard).
+
+	getPiece(Board, X1, Y2, P1),
+	getHeight(P1, H1),
+	random(1, H1, Height).
 
 getBotMoveValue(Board, Move, Colour, Value):-
 	nth0(0, Move, Piece1),
@@ -149,24 +162,7 @@ getBiggestValueMove(Board, [H|T], Colour, MaxValue, MaxMove, Move):-
 	getBiggestValueMoveAux(Board, [H|T], Colour, Value, MaxValue, MaxMove, Move).
 
 
-botMove2(Board, Colour, NewBoard):-
-	getBotMoves(Board, Colour, Moves),
-	getBiggestValueMove(Board, Moves, Colour, Move),
 
-	nth0(0, Move, Piece1),
-	nth0(0, Piece1, X1),
-	nth0(1, Piece1, Y1),
-	nth0(1, Move, Piece2),
-	nth0(0, Piece2, X2),
-	nth0(1, Piece2, Y2),
-
-	getPiece(Board, X, Y, P1),
-	getHeight(P1, Height),
-	random(1, Height, RandomHeight),
-
-	write('RandomHeight = '),write(Height),nl,
-
-	makeMove(Board, X1, Y1, X2, Y2, RandomHeight, NewBoard).
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
@@ -227,6 +223,12 @@ playerMoveAux(Board, X, Y, Colour, I, NewBoard, Piece, PieceColour):-
 	invalidInput('The stack must have more than one piece!', Board, Colour, I, NewBoard).
 
 playerMoveAux(Board, X, Y, Colour, I, NewBoard, Piece, PieceColour):- 
+	valid_moves(Board, X, Y, Moves),
+	length(Moves, L),
+	L = 0,
+	invalidInput('That piece has no possible moves!', Board, Colour, I, NewBoard).
+
+playerMoveAux(Board, X, Y, Colour, I, NewBoard, Piece, PieceColour):- 
 	Colour = PieceColour,
 	playerMove2(Board, Colour, X, Y, I, NewBoard).
 
@@ -234,13 +236,6 @@ playerMoveAux(Board, X, Y, Colour, I, NewBoard, Piece, PieceColour):-
 	PieceColour \= '',
 	invalidInput('That piece belongs to the other player!', Board, Colour, I, NewBoard).
 
-
-returnToStackSelector('Z'), Board, Colour, I, NewBoard:-
-	write('cona').
-	
-
-returnToStackSelector(P, Board, Colour, I, NewBoard):-
-	true.
 
 playerMove2(Board, Colour, X1, Y1, I, NewBoard):-
 	valid_moves(Board, X1, Y1, Moves),

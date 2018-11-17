@@ -26,3 +26,8 @@ maximum(A, B, C):-
 maximum(A, B, C):-
 	A =< B,
 	C = B.
+
+printList([]).
+printList([H|T]):-
+	write(H),nl,
+	printList(T).

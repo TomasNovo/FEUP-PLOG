@@ -31,6 +31,16 @@ getBoardSize([H|T], X, Y):-
 	length(H, X),
 	length([H|T], Y).
 
+makeMove(Board, Move, N, X):-
+
+	nth0(0, Move, Piece1),
+	nth0(0, Piece1, X1),
+	nth0(1, Piece1, Y1),
+	nth0(1, Move, Piece2),
+	nth0(0, Piece2, X2),
+	nth0(1, Piece2, Y2),
+
+	makeMove(Board, X1, Y1, X2, Y2, N, X).
 
 makeMove([H|T], X1, Y1, X2, Y2, N2, X):-
 	isWithinBounds([H|T], X1, Y1),
@@ -76,6 +86,18 @@ getColour(Piece, Colour):-
 	getColour(Piece, Colour, L).
 
 
+getMovingPlayer(Board, Player):-
+	getPieces(Board, 'w', Wpieces),
+	getPieces(Board, 'b', Bpieces),
+	length(Wpieces, WL),
+	length(Bpieces, BL),
+	getMovingPlayer(Board, WL, BL, Player).
+
+getMovingPlayer(_, WL, WL, 'w').
+
+getMovingPlayer(_, WL, BL, 'b').
+
+
 % Iterates the moves list and makes the pairs
 getBotMoves2(_, _, [], OutList, OutList).
 getBotMoves2(X1, Y1, [H|T], InList, OutList):-
@@ -89,7 +111,7 @@ getBotMoves(Board, [H|T], InList, OutList):-
 	nth0(0, H, X),
 	nth0(1, H, Y),
 	valid_moves(Board, X, Y, Moves),
-	getBotMoves2(X, Y, Moves, Final, Foobar),
+	getBotMoves2(X, Y, Moves, InList, Foobar),
 	getBotMoves(Board, T, Foobar, OutList).
 
 % Gets the list of moves in [[[X1,Y1],[X2,Y2]]] form
@@ -133,9 +155,16 @@ valid_moves(Board, X, Y, Output):-
 	getColour(Piece, Colour),
 	getHeight(Piece, Height),
 
-	(Height > 1;
-	append([], [], Output)),
+	valid_moves2(Board, X, Y, Height, Colour, Output).
 
+valid_moves2(Board, X, Y, Height, Colour, Output):-
+
+	Height = 1,
+	append([], [], Output).
+
+valid_moves2(Board, X, Y, Height, Colour, Output):-
+
+	Height > 1,
 	X1 is X+1, Y1 is Y-2, %% Up-right
 	checkPieceMove(Board, X1, Y1, Colour, Foobar, Foobar2),
 	X2 is X+2, Y2 is Y-1, %% Right-up
@@ -152,7 +181,7 @@ valid_moves(Board, X, Y, Output):-
 	checkPieceMove(Board, X7, Y7, Colour, Foobar7, Foobar8),
 	X8 is X-1, Y8 is Y-2, %% Up-left
 	checkPieceMove(Board, X8, Y8, Colour, Foobar8, Output).
-
+	
 
 checkPieceMove(Board, X, Y, Colour, InputList, OutputList):-
 	checkAdjacent(Board, X, Y, Colour) ->
