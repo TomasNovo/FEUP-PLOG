@@ -46,7 +46,7 @@ gameOptions(1):- clear_console(60),
 		   		 %countdown, nl, nl, 
 		   		 clear_console(60), gameLoop.
 gameOptions(2):- gameLoopPlayervsBot.
-gameOptions(3):- write('Option 3').
+gameOptions(3):- gameLoopBotvsBot.
 gameOptions(4):- write_credits.
 gameOptions(5):- true.
 gameOptions(N):- write('Wrong input, please input again !'), kl.
@@ -64,6 +64,31 @@ pc_difficulty_read(1) :- write('Difficulty Hard setted !').
 write_credits :- (write('Game developed by : '), nl,
 				  write('- Joao Pedro Viveiros Franco'), nl,
 				  write('- Tomas Nuno Fernandes Novo'), nl,nl).
+
+gameOverMenu('w'):-
+	write('Whites won!'),nl,
+	write('Write 1 to go back to the Main Menu or 0 to exit.'),nl,
+	read(Option),
+	gameOverOption(Option).
+
+gameOverMenu('b'):-
+	write('Blacks won!'),nl,
+	write('Write 1 to go back to the Main Menu or 0 to exit.'),nl,
+	read(Option),
+	gameOverOption(Option).
+
+
+gameOverOption(0):-
+	true.
+gameOverOption(1):-
+	kl.
+gameOverOption(Option):-
+	Option \= 0,
+	Option \= 1,
+	write('Invalid input'),nl,nl,
+	read(Option2),
+	gameOverOption(Option2).
+
 
 % countdown fort game to start
 countdown :-write('Game Starting in: 3'),nl,
@@ -84,23 +109,27 @@ countdown :-write('Game Starting in: 3'),nl,
 %  botMove -> Executes the move
 
 moveBot(Board, I, NewBoard) :-
-	printBoard(Board), nl,
 	P is mod(I, 2),
 	moveBot(Board, I, P, NewBoard).
 
+
 moveBot(Board, I, 0, NewBoard):- 
+	choose_move(Board, 'w', 1, Move, Height),
+	makeMove(Board, Move, Height, NewBoard),
+	value(NewBoard, 'w', Value),
+
 	write('Whites playing !'),nl,
-	choose_move(Board, 'w', Move),
-	makeMove(Board, Move, Height, NewBoard).
+	write('Move : '), write(Move),nl,
+	write('Value = '), write(Value),nl,nl.
 
 moveBot(Board, I, 1, NewBoard):- 
-	write('Blacks playing !'),nl,
-	choose_move(Board, 'b', Move, Height),
-	makeMove(Board, Move, Height, NewBoard).
+	choose_move(Board, 'b', 0, Move, Height),
+	makeMove(Board, Move, Height, NewBoard),
+	value(NewBoard, 'b', Value),
 
-choose_move(Board, Level, Move, Height):-
-	getMovingPlayer(Board, Player),
-	choose_move(Board, Player, Level, Move, Height).
+	write('Blacks playing !'),nl,
+	write('Move : '), write(Move),nl,
+	write('Value = '), write(Value),nl,nl.
 
 choose_move(Board, Colour, 0, Move, Height):-
 	getBotMoves(Board, Colour, Moves),
@@ -157,7 +186,7 @@ getBiggestValueMove(Board, [H|T], Colour, MaxValue, MaxMove, Move):-
 	nth0(0, Piece2, X2),
 	nth0(1, Piece2, Y2),
 
-	write(X1), nl,write(Y1),nl, write(X2),nl, write(Y2),nl, write(Value),nl,nl, 
+	%% write(X1), nl,write(Y1),nl, write(X2),nl, write(Y2),nl, write(Value),nl,nl, 
 
 	getBiggestValueMoveAux(Board, [H|T], Colour, Value, MaxValue, MaxMove, Move).
 
@@ -173,7 +202,6 @@ getBiggestValueMove(Board, [H|T], Colour, MaxValue, MaxMove, Move):-
 
 %Moves piece
 movePrompt(Board, I, NewBoard) :-
-	printBoard(Board),nl,
 	P is mod(I, 2),
 	movePrompt(Board, I, NewBoard, P).
 
@@ -289,6 +317,14 @@ getLetter(I):-
 %gameLoopPlayervsBot - Loop of the Player Vs Computer game according to number of plays
 %gameLoopBotVsBot - Loop of the Computer Vs Computer game according to number of plays
 
+checkWinnerMenu(Board):-
+	game_over(Board, Winner),
+	gameOverMenu(Winner).
+
+checkWinnerMenu(Board):-
+	game_over(Board, Winner);
+	true.
+
 gameLoop:-
 	write('KNIGHT LINE '), nl,nl,nl,
 	I is 0,
@@ -296,6 +332,9 @@ gameLoop:-
 	gameLoop(Board, I).
 
 gameLoop(Board, I):-
+	printBoard(Board),nl,
+	checkWinnerMenu(Board),
+
 	movePrompt(Board, I, NewBoard),
 	I1 is I+1,
 	gameLoop(NewBoard, I1).
@@ -306,6 +345,9 @@ gameLoopPlayervsBot:-
 	gameLoopPlayervsBot(Board, I).
 
 gameLoopPlayervsBot(Board, I):-
+	printBoard(Board),nl,
+	checkWinnerMenu(Board),
+
  	P is mod(I, 2),
  	gameLoopPlayervsBot(Board, I, P, NewBoard),
 
@@ -318,13 +360,23 @@ gameLoopPlayervsBot(Board, I, 0, NewBoard):-
 gameLoopPlayervsBot(Board, I, 1, NewBoard):-
 	moveBot(Board, I, NewBoard).	
 	
-
-
-gameBotVsBot:-
-	countdown,
+gameLoopBotvsBot:-
 	I is 0,
 	initialBoard(Board),
-	gameLoopBotVsBot(Board,I).
+	gameLoopBotvsBot(Board, I).
+
+gameLoopBotvsBot(Board, I):-
+	printBoard(Board),nl,
+ 	checkWinnerMenu(Board),
+
+ 	P is mod(I, 2),
+ 	sleep(2),
+ 	moveBot(Board, I, NewBoard),
+
+ 	I1 is I+1,
+	gameLoopBotvsBot(NewBoard, I1).
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 

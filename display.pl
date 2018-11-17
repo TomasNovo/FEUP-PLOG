@@ -75,6 +75,16 @@ addLineBottom([H|T], Y) :-
 	addTail([H|T], W, Y).
 
 
+printColumnNumber(N):- 
+	N < 10,
+	write(N),
+	write(' |').
+
+ printColumnNumber(N):- 
+	N >= 10,
+	write(N),
+	write('|').
+
 %Prints piece and colour
 printPieceColourAux(N, Colour):- 
 	N < 10,
@@ -110,7 +120,7 @@ print_line([H|T]):-
 
 printBoard([], _).
 printBoard([H|T], I) :-
-	write(I),write(' |'),
+	printColumnNumber(I),
 	print_line(H),
 
 	I1 is I+1,

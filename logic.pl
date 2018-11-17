@@ -17,6 +17,14 @@ testBoard2(	[[[], [], [], [], [], [], []],
 			[[], [], [], [6, 'w'], [1, 'b'], [], []],
 			[[], [], [], [], [], [], []]]).
 
+testBoard3(	[[[], [], [], [], [], [], []],
+			[[], [], [4, 'w'], [4, 'b'], [], [], []],
+			[[], [], [], [1, 'w'], [2, 'b'], [], []],
+			[[], [3, 'w'], [13, 'b'], [], [], [3, 'b'], []],
+			[[], [], [], [6, 'w'], [1, 'b'], [], [3, 'b']],
+			[[], [], [], [], [], [], []]]).
+
+ 
 testingBoard(X):-
 	initialBoard(Z),
 	addVerticalLines(Z, Y),
@@ -163,6 +171,7 @@ valid_moves2(Board, X, Y, Height, Colour, Output):-
 	append([], [], Output).
 
 valid_moves2(Board, X, Y, Height, Colour, Output):-
+	append([], [], Foobar),
 
 	Height > 1,
 	X1 is X+1, Y1 is Y-2, %% Up-right
@@ -333,7 +342,14 @@ game_over(Board, Winner):-
 	(checkWinVertical(Board, 0, Bl, Ll, Winner);
 	checkWinHorizontal(Board, 0, Bl, Ll, Winner);
 	checkWinDownRight(Board, 0, Bl, Ll, Winner);
-	checkWinDownLeft(Board, 0, Bl, Ll, Winner)).
+	checkWinDownLeft(Board, 0, Bl, Ll, Winner));
+
+	(getBotMoves(Board, 'w', WMoves),
+	getBotMoves(Board, 'b', BMoves),
+	length(WMoves, 0),
+	length(BMoves, 0),
+
+	Winner = 'b').
 
 checkWinVertical(Board, Y, Bl, Ll, Winner):-
 	Bl2 is Bl-3,
