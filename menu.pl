@@ -4,6 +4,9 @@
 % MENU %
 %%%%%%%%
 
+% Starts the game
+play :- kl.
+
 % Starts menu and reads option
 kl :-
 	clear_console(60),
@@ -37,18 +40,18 @@ display_options :-
 gameOptions(1):- clear_console(60),
 				 write('You selected Player vs Player game !'),nl, nl,
 				 write('Instructions: '), nl,nl,
-				 write('- Whites play first.'), nl,
+				 write('- Whites play first and can only move one piece.'), nl,
 				 write('- Enter the X and Y of the stack you want to move.'),nl,
 				 write('- Enter the letter of the move you can make according to the possibilities.'), nl,
 				 write('- Enter it in CAPS LOCK and between '' '' '), nl,nl,nl,nl,nl,nl,nl,nl,nl,
-				 sleep(5), 
+				 sleep(7), 
 				 clear_console(60),
 		   		 write('Have a nice game ! '), nl,nl,nl,nl,nl,nl,nl,nl,nl, 
 		   		 countdown, nl, nl, 
 		   		 clear_console(60), gameLoop.
 gameOptions(2):- gameLoopPlayerVsBot.
 gameOptions(3):- gameLoopBotVsBot.
-gameOptions(4):- write_credits.
+gameOptions(4):- write_credits, sleep(5), kl.
 gameOptions(5):- true.
 gameOptions(_):- write('Wrong input, please input again !'), kl.
 
@@ -78,7 +81,7 @@ gameOverMenu('b'):-
 	read(Option),
 	gameOverOption(Option).
 
-
+% Displays options after the end of the game
 gameOverOption(0):-
 	true.
 gameOverOption(1):-
@@ -98,10 +101,6 @@ countdown :-write('Game Starting in: 3'),nl,
 	sleep(1),
 	write('Game Starting in: 1'),nl,
 	sleep(1). 
-
-
-
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
@@ -307,6 +306,7 @@ checkGameOver(Board):-
 	game_over(Board, Winner),
 	gameOverMenu(Winner).
 
+% Sets difficulty of bot player
 setDifficulty(Difficulty):-
 	write('Choose a difficulty:'),nl,
 	write('1 - Medium'),nl,

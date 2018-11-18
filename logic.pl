@@ -109,8 +109,6 @@ getColour(Piece, Colour):-
 	getColour(Piece, Colour, L).
 
 
-% Iterates the moves list and makes the pairs
-
 
 
 

@@ -1,5 +1,10 @@
 :- consult('utilities.pl'), use_module(library(lists)).
 
+%%%%%%%%%%%
+% Console %
+%%%%%%%%%%%
+
+% Helper to clear console 
 clear_console :- 
 	clear_console(40), !.
 
@@ -7,7 +12,17 @@ clear_console(0).
 
 clear_console(N) :-
 	nl, N1 is N - 1, clear_console(N1).
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Game Rows and columns index %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%Helpers to display the Board
+% displayBar - displays bar in index
+% displayX - displays X index on board
+% printColumnNumber - displays Y index on board
 displayBar(Board):-
 	getBoardSize(Board, W, _),
 	I is 1,
@@ -33,6 +48,17 @@ displayX(Board, Width, N) :-
 	N1 @< Width,
 	displayX(Board, Width, N1);
 	true).
+
+printColumnNumber(N):- 
+	N < 10,
+	write(N),
+	write(' |').
+
+ printColumnNumber(N):- 
+	N >= 10,
+	write(N),
+	write('|').
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 alphabet([' A ', ' B ', ' C ', ' D ', ' E ', ' F ', ' G ', ' H ']).
 
@@ -75,15 +101,7 @@ addLineBottom([H|T], Y) :-
 	addTail([H|T], W, Y).
 
    
-printColumnNumber(N):- 
-	N < 10,
-	write(N),
-	write(' |').
 
- printColumnNumber(N):- 
-	N >= 10,
-	write(N),
-	write('|').
 
 %Prints piece and colour
 printPieceColourAux(N, Colour):- 
