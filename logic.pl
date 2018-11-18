@@ -350,16 +350,16 @@ valueCheckFour(Board, X1, Y1, X2, Y2, X3, Y3, X4, Y4, Player, Max, NewMax):-
 game_over(Board, Winner):-
 	getBoardSize(Board, Ll, Bl),
 
-	game_over2(Board, Ll, Bl, Winner).
+	game_over(Board, Ll, Bl, Winner).
 	
 
-game_over2(Board, Ll, Bl, Winner):-
+game_over(Board, Ll, Bl, Winner):-
 	checkWinVertical(Board, 0, Bl, Ll, Winner);
 	checkWinHorizontal(Board, 0, Bl, Ll, Winner);
 	checkWinDownRight(Board, 0, Bl, Ll, Winner);
 	checkWinDownLeft(Board, 0, Bl, Ll, Winner).
 
-game_over2(Board, _, _, Winner):-
+game_over(Board, _, _, Winner):-
 	valid_moves(Board, 'w', WMoves),
 	valid_moves(Board, 'b', BMoves),
 

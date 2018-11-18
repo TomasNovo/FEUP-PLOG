@@ -42,6 +42,7 @@ checkHeight(_, 0, 1).
 checkHeight(H1, _, H1).
 
 choose_move(_, _, _, [], [], 0).
+
 choose_move(Board, _, 1, Moves, Move, Height):-
 
 	length(Moves, MovesLength),

@@ -74,7 +74,7 @@ addLineBottom([H|T], Y) :-
 	createLine(W, Hl),
 	addTail([H|T], W, Y).
 
-
+   
 printColumnNumber(N):- 
 	N < 10,
 	write(N),
