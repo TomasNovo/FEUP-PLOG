@@ -5,10 +5,10 @@ replace([H|T], Index, New, [H|R]) :-
 	replace(T, I1, New, R), !.
 
 %Replace element in list by its coords
-replaceByCoords([H|T], X, Y, New, [H2|R]) :-
-    nth0(Y, [H|T], Line),
+replaceByCoords(List1, X, Y, New, List2) :-
+    nth0(Y, List1, Line),
     replace(Line, X, New, L),
-    replace([H|T], Y, L, [H2|R]), !.
+    replace(List1, Y, L, List2), !.
 
 %Appends on head of list
 addHead([H|T],A,Zs) :-

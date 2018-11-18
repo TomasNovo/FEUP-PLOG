@@ -24,6 +24,15 @@ testBoard3(	[[[], [], [], [], [], [], []],
 			[[], [], [], [6, 'w'], [1, 'b'], [], [3, 'b']],
 			[[], [], [], [], [], [], []]]).
 
+testBoard4(	[[[], [], [], [], [], [], [], [], []],
+			[[], [], [], [], [1, 'w'], [1, 'w'], [], [], []],
+			[[], [], [], [1, 'w'], [1, 'b'], [], [1, 'w'], [1, 'w'], []],
+			[[], [], [], [1, 'w'], [2, 'w'], [1, 'w'], [1, 'b'], [1, 'b'], []],
+			[[], [], [8 ,'w'], [1, 'b'], [1, 'b'], [1, 'b'], [1, 'w'], [1, 'w'], []],
+			[[], [1, 'b'], [], [], [1, 'w'], [7, 'b'], [1, 'b'], [], []],
+			[[], [], [], [3, 'b'], [1, 'b'], [1, 'b'], [], [], []],
+			[[], [], [], [], [], [], [], [], []]]).
+
  
 testingBoard(X):-
 	initialBoard(Z),
@@ -39,7 +48,7 @@ getBoardSize([H|T], X, Y):-
 	length(H, X),
 	length([H|T], Y).
 
-makeMove(Board, Move, N, X):-
+move(Move, Board, N, X):-
 
 	nth0(0, Move, Piece1),
 	nth0(0, Piece1, X1),
@@ -48,31 +57,28 @@ makeMove(Board, Move, N, X):-
 	nth0(0, Piece2, X2),
 	nth0(1, Piece2, Y2),
 
-	makeMove(Board, X1, Y1, X2, Y2, N, X).
+	move(Board, X1, Y1, X2, Y2, N, X).
 
-makeMove([H|T], X1, Y1, X2, Y2, N2, X):-
-	isWithinBounds([H|T], X1, Y1),
-	isWithinBounds([H|T], X2, Y2),
+move(Board, X1, Y1, X2, Y2, N2, X):-
+	isWithinBounds(Board, X1, Y1),
+	isWithinBounds(Board, X2, Y2),
 	
-	getPiece([H|T], X1, Y1, Piece),
+	getPiece(Board, X1, Y1, Piece),
 	length(Piece, 2),
-	getPiece([H|T], X2, Y2, Piece2),
+	getPiece(Board, X2, Y2, Piece2),
 	length(Piece2, 0),
 
 	nth0(0, Piece, N1),
 	nth0(1, Piece, Colour),
-	nth0(Y1, [H|T], Line),
+	nth0(Y1, Board, Line),
 	N is N1-N2,
 
 	N > 0, N2 > 0,
 
-	replace(Line, X1, [N, Colour], L),
-	replace([H|T], Y1, L, Foo),
+	replaceByCoords(Board, X1, Y1, [N, Colour], List1),
+	replaceByCoords(List1, X2, Y2, [N2, Colour], List2),
 
-	nth0(Y2, [H|T], Line2),
-	replace(Line2, X2, [N2, Colour], L2),
-	replace(Foo, Y2, L2, Foo2),
-	increaseBoard(Foo2, X).
+	increaseBoard(List2, X).
 
 getPiece([H|T], X, Y, Piece) :-
 	nth0(Y, [H|T], Line),
@@ -126,7 +132,7 @@ getBotMoves(Board, [H|T], InList, OutList):-
 getBotMoves(Board, Colour, Moves):-
 	append([], [], EmptyList),
 	getPieces(Board, Colour, Pieces),
-	getBotMoves(Board, Pieces, EmptyList, Moves).
+	getBotMoves(Board, Pieces, EmptyList, Moves), !.
 
 getPiecesLine([H|T], Colour, PieceColour, X, Y, Pieces, NewPieces):-
 	Colour = PieceColour,
@@ -193,15 +199,14 @@ valid_moves2(Board, X, Y, Height, Colour, Output):-
 	
 
 checkPieceMove(Board, X, Y, Colour, InputList, OutputList):-
-	checkAdjacent(Board, X, Y, Colour) ->
-		append(InputList, [[X, Y]], OutputList);
-
-		append(InputList, [], OutputList).
+	(checkAdjacent(Board, X, Y, Colour),
+	append(InputList, [[X, Y]], OutputList));
+	append(InputList, [], OutputList).
 
 checkAdjacent(Board, X, Y, Colour):-
 	
 	getPiece(Board, X, Y, Piece),
-	length(Piece, 0),
+	append([], [], Piece),
 
 	X1 is X, Y1 is Y-1, %% Up
 	X2 is X+1, Y2 is Y-1, %% Up-right
@@ -223,8 +228,7 @@ checkAdjacent(Board, X, Y, Colour):-
 
 checkPieceColour(Board, X, Y, Colour):-
 	getPiece(Board, X, Y, Piece),
-	nth0(1, Piece, Colour1),
-	dif(Colour, Colour1).
+	nth0(1, Piece, Colour1).
 
 colourToNumber('', 0).
 colourToNumber('w', 1).
@@ -339,17 +343,23 @@ valueCheckFour(Board, X1, Y1, X2, Y2, X3, Y3, X4, Y4, Player, Max, NewMax):-
 game_over(Board, Winner):-
 	getBoardSize(Board, Ll, Bl),
 
-	(checkWinVertical(Board, 0, Bl, Ll, Winner);
+	game_over2(Board, Ll, Bl, Winner).
+	
+
+game_over2(Board, Ll, Bl, Winner):-
+	checkWinVertical(Board, 0, Bl, Ll, Winner);
 	checkWinHorizontal(Board, 0, Bl, Ll, Winner);
 	checkWinDownRight(Board, 0, Bl, Ll, Winner);
-	checkWinDownLeft(Board, 0, Bl, Ll, Winner));
+	checkWinDownLeft(Board, 0, Bl, Ll, Winner).
 
-	(getBotMoves(Board, 'w', WMoves),
+game_over2(Board, Ll, Bl, Winner):-
+	getBotMoves(Board, 'w', WMoves),
 	getBotMoves(Board, 'b', BMoves),
-	length(WMoves, 0),
-	length(BMoves, 0),
 
-	Winner = 'b').
+	append([], [], WMoves),
+	append([], [], BMoves),
+
+	Winner = 'b'.
 
 checkWinVertical(Board, Y, Bl, Ll, Winner):-
 	Bl2 is Bl-3,
