@@ -37,13 +37,14 @@ display_options :-
 gameOptions(1):- clear_console(60),
 				 write('You selected Player vs Player game !'),nl, nl,
 				 write('Instructions: '), nl,nl,
+				 write('- Whites play first.'), nl,
 				 write('- Enter the X and Y of the stack you want to move.'),nl,
 				 write('- Enter the letter of the move you can make according to the possibilities.'), nl,
-				 write('  Enter it in CAPS LOCK and between '' '' '), nl,nl,nl,nl,nl,nl,nl,nl,nl,
-				 %sleep(3), 
-				 %clear_console(60),
+				 write('- Enter it in CAPS LOCK and between '' '' '), nl,nl,nl,nl,nl,nl,nl,nl,nl,
+				 sleep(5), 
+				 clear_console(60),
 		   		 write('Have a nice game ! '), nl,nl,nl,nl,nl,nl,nl,nl,nl, 
-		   		 %countdown, nl, nl, 
+		   		 countdown, nl, nl, 
 		   		 clear_console(60), gameLoop.
 gameOptions(2):- gameLoopPlayerVsBot.
 gameOptions(3):- gameLoopBotVsBot.

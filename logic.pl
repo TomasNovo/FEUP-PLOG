@@ -45,21 +45,17 @@ winningBoard(	[[[5, 'b'], [], [], [1, 'w']],
 				[[], [], [], []],
 				[[], [], [8, 'w'], [15, 'b']]]).
 
- 
-testingBoard(X):-
-	initialBoard(Z),
-	addVerticalLines(Z, Y),
-	addHorizontalLines(Y, X).
-
-
+% Returns if a point (X,Y) is withing the board
 isWithinBounds(Board, X, Y) :-
 	getBoardSize(Board, Width, Height),
 	X >= 0, X < Width, Y >= 0, Y < Height.
 
+% Returns the dimensions of the board
 getBoardSize([H|T], X, Y):-
 	length(H, X),
 	length([H|T], Y).
 
+% Executes a move on the board by subtracting the Height with N in the original piece and replacing the empty space with the new stack
 move([], Board, _, Board).
 move(Move, Board, N, X):-
 
@@ -92,19 +88,20 @@ move(Board, X1, Y1, X2, Y2, N2, X):-
 
 	increaseBoard(List2, X).
 
+% Returns the piece at the (X,Y) position
 getPiece([H|T], X, Y, Piece) :-
 	nth0(Y, [H|T], Line),
 	nth0(X, Line, Piece).
 
 
-%Gets piece Height
+% Returns the Height of a piece
 getHeight(_, Height, 0) :- Height = 0.
 getHeight(Piece, Height, 2) :- nth0(0, Piece, Height).
 getHeight(Piece, Height):-
 	length(Piece, L),
 	getHeight(Piece, Height, L).
 
-%Gets piece colour
+% Returns the Colour of a piece
 getColour(_, Colour, 0):- Colour = ''.
 getColour(Piece, Colour, 2):- nth0(1, Piece, Colour).
 getColour(Piece, Colour):-
@@ -112,25 +109,16 @@ getColour(Piece, Colour):-
 	getColour(Piece, Colour, L).
 
 
-getMovingPlayer(Board, Player):-
-	getPieces(Board, 'w', Wpieces),
-	getPieces(Board, 'b', Bpieces),
-	length(Wpieces, WL),
-	length(Bpieces, BL),
-	getMovingPlayer(Board, WL, BL, Player).
-
-getMovingPlayer(_, WL, WL, 'w').
-
-getMovingPlayer(_, _, _, 'b').
-
-
 % Iterates the moves list and makes the pairs
-valid_moves2(_, _, [], OutList, OutList).
-valid_moves2(X1, Y1, [H|T], InList, OutList):-
-	nth0(0, H, X2),
-	nth0(1, H, Y2),
-	append(InList, [[[X1,Y1],[X2,Y2]]], Foobar),
-	valid_moves2(X1, Y1, T, Foobar, OutList).
+
+
+
+
+% Gets the list of moves in [[[X1,Y1],[X2,Y2]]] form
+valid_moves(Board, Colour, Moves):-
+	EmptyList = [],
+	getPieces(Board, Colour, Pieces),
+	valid_moves(Board, Pieces, EmptyList, Moves), !.
 
 valid_moves(_, [], OutList, OutList).
 valid_moves(Board, [H|T], InList, OutList):-
@@ -140,20 +128,23 @@ valid_moves(Board, [H|T], InList, OutList):-
 	valid_moves2(X, Y, Moves, InList, Foobar),
 	valid_moves(Board, T, Foobar, OutList).
 
-% Gets the list of moves in [[[X1,Y1],[X2,Y2]]] form
-valid_moves(Board, Colour, Moves):-
-	EmptyList = [],
-	getPieces(Board, Colour, Pieces),
-	valid_moves(Board, Pieces, EmptyList, Moves), !.
+valid_moves2(_, _, [], OutList, OutList).
+valid_moves2(X1, Y1, [H|T], InList, OutList):-
+	nth0(0, H, X2),
+	nth0(1, H, Y2),
+	append(InList, [[[X1,Y1],[X2,Y2]]], Foobar),
+	valid_moves2(X1, Y1, T, Foobar, OutList).
 
-getPiecesLine(_, Colour, PieceColour, X, Y, Pieces, NewPieces):-
-	Colour = PieceColour,
-	append(Pieces, [[X,Y]], NewPieces).
+% Returns a list of the pieces that belong to a speific Player
+getPieces(Board, Colour, Pieces):-
+	EmptyPieces = [],
+	getPiecesBoard(Board, Colour, 0, EmptyPieces, Pieces).
 
-getPiecesLine(_, Colour, PieceColour, _, _, Pieces, NewPieces):-
-	Colour \= PieceColour,
-	append([], Pieces, NewPieces). 
-	
+getPiecesBoard([], _, _, Pieces, Pieces).
+getPiecesBoard([H|T], Colour, Y, EmptyPieces, Pieces):-
+	getPiecesLine(H, Colour, 0, Y, EmptyPieces, NewPieces),
+	Y1 is Y+1,
+	getPiecesBoard(T, Colour, Y1, NewPieces, Pieces).
 
 getPiecesLine([], _, _, _, Pieces, Pieces).
 getPiecesLine([H|T], Colour, X, Y, Pieces, NewPieces):-
@@ -163,17 +154,15 @@ getPiecesLine([H|T], Colour, X, Y, Pieces, NewPieces):-
 	X1 is X+1,
 	getPiecesLine(T, Colour, X1, Y, Foobar, NewPieces).
 
-getPiecesBoard([], _, _, Pieces, Pieces).
-getPiecesBoard([H|T], Colour, Y, EmptyPieces, Pieces):-
-	getPiecesLine(H, Colour, 0, Y, EmptyPieces, NewPieces),
-	Y1 is Y+1,
-	getPiecesBoard(T, Colour, Y1, NewPieces, Pieces).
+getPiecesLine(_, Colour, PieceColour, X, Y, Pieces, NewPieces):-
+	Colour = PieceColour,
+	append(Pieces, [[X,Y]], NewPieces).
 
-getPieces(Board, Colour, Pieces):-
-	EmptyPieces = [],
-	getPiecesBoard(Board, Colour, 0, EmptyPieces, Pieces).
+getPiecesLine(_, Colour, PieceColour, _, _, Pieces, NewPieces):-
+	Colour \= PieceColour,
+	append([], Pieces, NewPieces).
 
-
+% Returns the possible moves of a piece
 getPieceMoves(Board, X, Y, Output):-
 
 	getPiece(Board, X, Y, Piece),
@@ -205,12 +194,13 @@ getPieceMoves(Board, X, Y, Height, Colour, Output):-
 	X8 is X-1, Y8 is Y-2, %% Up-left
 	checkPieceMove(Board, X8, Y8, Colour, Foobar8, Output).
 	
-
+% If the point (X,Y) has a piece adjacent to it adds the move to the list
 checkPieceMove(Board, X, Y, Colour, InputList, OutputList):-
 	(checkAdjacent(Board, X, Y, Colour),
 	append(InputList, [[X, Y]], OutputList));
 	append(InputList, [], OutputList).
 
+% Checks if the point (X,Y) has a piece adjacent to it
 checkAdjacent(Board, X, Y, Colour):-
 	
 	getPiece(Board, X, Y, []),
@@ -233,14 +223,17 @@ checkAdjacent(Board, X, Y, Colour):-
 	checkPieceColour(Board, X7, Y7, Colour);
 	checkPieceColour(Board, X8, Y8, Colour)).
 
+% Checks if there is a piece at (X,Y)
 checkPieceColour(Board, X, Y, _):-
 	getPiece(Board, X, Y, Piece),
 	nth0(1, Piece, _).
 
+% Attributes the color of a piece to a number
 colourToNumber('', 0).
 colourToNumber('w', 1).
 colourToNumber('b', 2).
 
+% Returns the highest sequence of pieces of a player, similarly to game_over
 value(Board, Player, Value):-
 	getBoardSize(Board, Ll, Bl),
 
@@ -251,6 +244,7 @@ value(Board, Player, Value):-
 	valueDownRight(Board, 0, Bl, Ll, Player, Max3, Max4),
 	valueDownLeft(Board, 0, Bl, Ll, Player, Max4, Value).
 
+% Calculates the 4 points of each direction all over the board
 valueVertical(_, Bl, Bl, _, _, Max, Max).
 valueVertical(Board, Y, Bl, Ll, Player, Max, NewMax):-
 
@@ -337,7 +331,7 @@ valueCheckOne(Board, X, Y, Player, N, Max, NewMax):-
 	colourToNumber(Colour, C2),
 	C2 = C))), maximum(Max, N, NewMax).
 
-
+% Calculates the value of 4 pieces
 valueCheckFour(Board, X1, Y1, X2, Y2, X3, Y3, X4, Y4, Player, Max, NewMax):-
 
 	valueCheckOne(Board, X1, Y1, Player, 0, Max, NewMax);
@@ -346,7 +340,7 @@ valueCheckFour(Board, X1, Y1, X2, Y2, X3, Y3, X4, Y4, Player, Max, NewMax):-
 	valueCheckOne(Board, X4, Y4, Player, 3, Max, NewMax);
 	maximum(Max, 4, NewMax).
 
-
+% Checks if there is a winner and returns it if there is
 game_over(Board, Winner):-
 	getBoardSize(Board, Ll, Bl),
 
@@ -359,6 +353,7 @@ game_over(Board, Ll, Bl, Winner):-
 	checkWinDownRight(Board, 0, Bl, Ll, Winner);
 	checkWinDownLeft(Board, 0, Bl, Ll, Winner).
 
+% Checks if there are no more moves. If true blacks win
 game_over(Board, _, _, Winner):-
 	valid_moves(Board, 'w', WMoves),
 	valid_moves(Board, 'b', BMoves),
@@ -368,6 +363,7 @@ game_over(Board, _, _, Winner):-
 
 	Winner = 'b'.
 
+% Calculates the 4 points of each direction all over the board 
 checkWinVertical(Board, Y, Bl, Ll, Winner):-
 	Bl2 is Bl-3,
 	Y @< Bl2,
@@ -455,6 +451,7 @@ checkFour(Board, X1, Y1, X2, Y2, X3, Y3, X4, Y4, Winner):-
 	checkFour(Board, X1, Y1, X2, Y2, X3, Y3, X4, Y4, 'w', Winner);
 	checkFour(Board, X1, Y1, X2, Y2, X3, Y3, X4, Y4, 'b', Winner).
 
+% Checks if 4 points are of a specific player, if so returns Player as the Winner
 checkFour(Board, X1, Y1, X2, Y2, X3, Y3, X4, Y4, Colour, Winner):-
 
 	colourToNumber(Colour, C),
