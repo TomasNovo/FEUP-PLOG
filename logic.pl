@@ -33,6 +33,18 @@ testBoard4(	[[[], [], [], [], [], [], [], [], []],
 			[[], [], [], [3, 'b'], [1, 'b'], [1, 'b'], [], [], []],
 			[[], [], [], [], [], [], [], [], []]]).
 
+testBoard5(	[[[5, 'w'], [], [], []],
+			[[], [], [], []],
+			[[], [], [], []],
+			[[], [], [], []],
+			[[], [5, 'b'], [], [1, 'w']]]).
+
+winningBoard(	[[[5, 'b'], [], [], [1, 'w']],
+				[[], [], [1, 'w'], []],
+				[[], [1, 'w'], [], []],
+				[[], [], [], []],
+				[[], [], [8, 'w'], [15, 'b']]]).
+
  
 testingBoard(X):-
 	initialBoard(Z),
@@ -48,6 +60,7 @@ getBoardSize([H|T], X, Y):-
 	length(H, X),
 	length([H|T], Y).
 
+move([], Board, _, Board).
 move(Move, Board, N, X):-
 
 	nth0(0, Move, Piece1),
@@ -70,7 +83,6 @@ move(Board, X1, Y1, X2, Y2, N2, X):-
 
 	nth0(0, Piece, N1),
 	nth0(1, Piece, Colour),
-	nth0(Y1, Board, Line),
 	N is N1-N2,
 
 	N > 0, N2 > 0,
@@ -86,14 +98,14 @@ getPiece([H|T], X, Y, Piece) :-
 
 
 %Gets piece Height
-getHeight(Piece, Height, 0) :- Height = 0.
+getHeight(_, Height, 0) :- Height = 0.
 getHeight(Piece, Height, 2) :- nth0(0, Piece, Height).
 getHeight(Piece, Height):-
 	length(Piece, L),
 	getHeight(Piece, Height, L).
 
 %Gets piece colour
-getColour(Piece, Colour, 0):- Colour = ''.
+getColour(_, Colour, 0):- Colour = ''.
 getColour(Piece, Colour, 2):- nth0(1, Piece, Colour).
 getColour(Piece, Colour):-
 	length(Piece, L),
@@ -109,36 +121,36 @@ getMovingPlayer(Board, Player):-
 
 getMovingPlayer(_, WL, WL, 'w').
 
-getMovingPlayer(_, WL, BL, 'b').
+getMovingPlayer(_, _, _, 'b').
 
 
 % Iterates the moves list and makes the pairs
-getBotMoves2(_, _, [], OutList, OutList).
-getBotMoves2(X1, Y1, [H|T], InList, OutList):-
+valid_moves2(_, _, [], OutList, OutList).
+valid_moves2(X1, Y1, [H|T], InList, OutList):-
 	nth0(0, H, X2),
 	nth0(1, H, Y2),
 	append(InList, [[[X1,Y1],[X2,Y2]]], Foobar),
-	getBotMoves2(X1, Y1, T, Foobar, OutList).
+	valid_moves2(X1, Y1, T, Foobar, OutList).
 
-getBotMoves(_, [], OutList, OutList).
-getBotMoves(Board, [H|T], InList, OutList):-
+valid_moves(_, [], OutList, OutList).
+valid_moves(Board, [H|T], InList, OutList):-
 	nth0(0, H, X),
 	nth0(1, H, Y),
-	valid_moves(Board, X, Y, Moves),
-	getBotMoves2(X, Y, Moves, InList, Foobar),
-	getBotMoves(Board, T, Foobar, OutList).
+	getPieceMoves(Board, X, Y, Moves),
+	valid_moves2(X, Y, Moves, InList, Foobar),
+	valid_moves(Board, T, Foobar, OutList).
 
 % Gets the list of moves in [[[X1,Y1],[X2,Y2]]] form
-getBotMoves(Board, Colour, Moves):-
-	append([], [], EmptyList),
+valid_moves(Board, Colour, Moves):-
+	EmptyList = [],
 	getPieces(Board, Colour, Pieces),
-	getBotMoves(Board, Pieces, EmptyList, Moves), !.
+	valid_moves(Board, Pieces, EmptyList, Moves), !.
 
-getPiecesLine([H|T], Colour, PieceColour, X, Y, Pieces, NewPieces):-
+getPiecesLine(_, Colour, PieceColour, X, Y, Pieces, NewPieces):-
 	Colour = PieceColour,
 	append(Pieces, [[X,Y]], NewPieces).
 
-getPiecesLine([H|T], Colour, PieceColour, X, Y, Pieces, NewPieces):-
+getPiecesLine(_, Colour, PieceColour, _, _, Pieces, NewPieces):-
 	Colour \= PieceColour,
 	append([], Pieces, NewPieces). 
 	
@@ -158,26 +170,22 @@ getPiecesBoard([H|T], Colour, Y, EmptyPieces, Pieces):-
 	getPiecesBoard(T, Colour, Y1, NewPieces, Pieces).
 
 getPieces(Board, Colour, Pieces):-
-	append([], [], EmptyPieces),
+	EmptyPieces = [],
 	getPiecesBoard(Board, Colour, 0, EmptyPieces, Pieces).
 
 
-valid_moves(Board, X, Y, Output):-
-	append([], [], Foobar),
+getPieceMoves(Board, X, Y, Output):-
 
 	getPiece(Board, X, Y, Piece),
 	getColour(Piece, Colour),
 	getHeight(Piece, Height),
 
-	valid_moves2(Board, X, Y, Height, Colour, Output).
+	getPieceMoves(Board, X, Y, Height, Colour, Output), !.
 
-valid_moves2(Board, X, Y, Height, Colour, Output):-
+getPieceMoves(_, _, _, 1, _, []).
 
-	Height = 1,
-	append([], [], Output).
-
-valid_moves2(Board, X, Y, Height, Colour, Output):-
-	append([], [], Foobar),
+getPieceMoves(Board, X, Y, Height, Colour, Output):-
+	Foobar = [],
 
 	Height > 1,
 	X1 is X+1, Y1 is Y-2, %% Up-right
@@ -205,8 +213,7 @@ checkPieceMove(Board, X, Y, Colour, InputList, OutputList):-
 
 checkAdjacent(Board, X, Y, Colour):-
 	
-	getPiece(Board, X, Y, Piece),
-	append([], [], Piece),
+	getPiece(Board, X, Y, []),
 
 	X1 is X, Y1 is Y-1, %% Up
 	X2 is X+1, Y2 is Y-1, %% Up-right
@@ -226,9 +233,9 @@ checkAdjacent(Board, X, Y, Colour):-
 	checkPieceColour(Board, X7, Y7, Colour);
 	checkPieceColour(Board, X8, Y8, Colour)).
 
-checkPieceColour(Board, X, Y, Colour):-
+checkPieceColour(Board, X, Y, _):-
 	getPiece(Board, X, Y, Piece),
-	nth0(1, Piece, Colour1).
+	nth0(1, Piece, _).
 
 colourToNumber('', 0).
 colourToNumber('w', 1).
@@ -352,12 +359,12 @@ game_over2(Board, Ll, Bl, Winner):-
 	checkWinDownRight(Board, 0, Bl, Ll, Winner);
 	checkWinDownLeft(Board, 0, Bl, Ll, Winner).
 
-game_over2(Board, Ll, Bl, Winner):-
-	getBotMoves(Board, 'w', WMoves),
-	getBotMoves(Board, 'b', BMoves),
+game_over2(Board, _, _, Winner):-
+	valid_moves(Board, 'w', WMoves),
+	valid_moves(Board, 'b', BMoves),
 
-	append([], [], WMoves),
-	append([], [], BMoves),
+	WMoves = [],
+	BMoves = [],
 
 	Winner = 'b'.
 

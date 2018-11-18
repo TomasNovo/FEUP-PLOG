@@ -1,4 +1,4 @@
-:- consult('logic.pl'), consult('display.pl'), use_module(library(system)), use_module(library(random)).
+:- consult('logic.pl'), consult('bot.pl'), consult('display.pl'), use_module(library(system)).
 
 %%%%%%%%
 % MENU %
@@ -49,7 +49,7 @@ gameOptions(2):- gameLoopPlayerVsBot.
 gameOptions(3):- gameLoopBotVsBot.
 gameOptions(4):- write_credits.
 gameOptions(5):- true.
-gameOptions(N):- write('Wrong input, please input again !'), kl.
+gameOptions(_):- write('Wrong input, please input again !'), kl.
 
 % Sets difficulty of Computer player
 select_difficulty_pc :- write('You selected Player vs Computer game !'),
@@ -98,116 +98,6 @@ countdown :-write('Game Starting in: 3'),nl,
 	write('Game Starting in: 1'),nl,
 	sleep(1). 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-
-%%%%%%%%%%%%%%%%%
-% Bot functions %
-%%%%%%%%%%%%%%%%%
-% Makes a move for computer player
-%  moveBot -> Makes a move for computer player according to colour and play number
-%  botMove -> Executes the move
-
-moveBot(Board, I, Difficulty, NewBoard) :-
-	P is mod(I, 2),
-	moveBot(Board, I, P, Difficulty, NewBoard).
-
-
-moveBot(Board, I, 0, Difficulty, NewBoard):- 
-	write('1'),nl,
-	choose_move(Board, 'w', Difficulty, Move, Height),
-	write('2'),nl,
-	move(Move, Board, Height, NewBoard),
-	write('3'),nl,
-	value(NewBoard, 'w', Value),
-
-	write('Whites playing !'),nl,
-	write('Move : '), write(Move),nl,
-	write('Value = '), write(Value),nl,nl.
-
-moveBot(Board, I, 1, Difficulty, NewBoard):-
-	write('1'),nl,
-	choose_move(Board, 'b', Difficulty, Move, Height),
-	write('2'),nl,
-	move(Move, Board, Height, NewBoard),
-	write('3'),nl,
-	value(NewBoard, 'b', Value),
-
-	write('Blacks playing !'),nl,
-	write('Move : '), write(Move),nl,
-	write('Value = '), write(Value),nl,nl.
-
-choose_move(Board, Colour, 1, Move, Height):-
-	write(9),nl,
-	getBotMoves(Board, Colour, Moves),
-
-	
-
-	length(Moves, MovesLength),
-	random(0, MovesLength, RandomIndex),
-	nth0(RandomIndex, Moves, Move),
-	
-	nth0(0, Move, Piece1),
-	nth0(0, Piece1, X1),
-	getPiece(Board, X1, Y1, Piece),
-	getHeight(Piece, H),
-	
-	random(1, H, Height).
-
-choose_move(Board, Colour, 2, Move, Height):-
-	getBotMoves(Board, Colour, Moves),
-	getBiggestValueMove(Board, Moves, Colour, Move),
-		
-	nth0(0, Move, Piece1),
-	nth0(0, Piece1, X1),
-	nth0(1, Piece1, Y1),
-	
-	getPiece(Board, X1, Y1, P1),
-	getHeight(P1, H),
-
-	H2 is H/3,
-	H3 is H2*2,
-	H4 is round(H2),
-	H5 is ceiling(H3),
-
-	write('H4 = '),write(H4),nl,
-	write('H5 = '),write(H5),nl,
-
-	random(H4, H5, Height).
-
-getBotMoveValue(Board, Move, Colour, Value):-
-	nth0(0, Move, Piece1),
-	nth0(0, Piece1, X1),
-	nth0(1, Piece1, Y1),
-	nth0(1, Move, Piece2),
-	nth0(0, Piece2, X2),
-	nth0(1, Piece2, Y2),
-	move(Board, X1, Y1, X2, Y2, 1, Board2),
-	value(Board2, Colour, Value).
-
-getBiggestValueMoveAux(Board, [H|T], Colour, Value, MaxValue, MaxMove, Move):-
-	Value > MaxValue,
-	getBiggestValueMove(Board, T, Colour, Value, H, Move).
-
-getBiggestValueMoveAux(Board, [H|T], Colour, Value, MaxValue, MaxMove, Move):-
-	Value =< MaxValue,
-	getBiggestValueMove(Board, T, Colour, MaxValue, MaxMove, Move).
-
-getBiggestValueMove(Board, Moves, Colour, Move):-
-	getBiggestValueMove(Board, Moves, Colour, 0, [[]], Move).
-
-getBiggestValueMove(_, [], _, _, Move, Move).
-getBiggestValueMove(Board, [H|T], Colour, MaxValue, MaxMove, Move):-
-	getBotMoveValue(Board, H, Colour, Value),
-
-	nth0(0, H, Piece1),
-	nth0(0, Piece1, X1),
-	nth0(1, Piece1, Y1),
-	nth0(1, H, Piece2),
-	nth0(0, Piece2, X2),
-	nth0(1, Piece2, Y2),
-
-	getBiggestValueMoveAux(Board, [H|T], Colour, Value, MaxValue, MaxMove, Move).
 
 
 
@@ -242,59 +132,60 @@ movePrompt(Board, I, NewBoard, 1):-
 %  playerMove3 -> Moves the number of pieces inputed by the user,  allowing the user to return 
 %				  to the stack selector if he want to move another piece
 
+playerMove(Board, Colour, _, NewBoard):-
+	valid_moves(Board, Colour, Moves),
+	Moves = [],
+	write('No moves are possible, skipping this turn'),nl,nl,
+	move([], Board, 0, NewBoard). %% Doesn't move
+
 playerMove(Board, Colour, I, NewBoard):-
 	nl,nl,write('Choose a stack to move (X,Y) : '),nl,
 	read(X),nl,
 	read(Y),nl,
 	playerMove(Board, Colour, X, Y, I, NewBoard).
 
+
 playerMove(Board, Colour, X, Y, I, NewBoard):-
 	getPiece(Board, X, Y, Piece),
 	playerMove(Board, X, Y, Piece, Colour, I, NewBoard).
 
-playerMove(Board, Colour, X, Y, I, NewBoard):-
+playerMove(Board, Colour, _, _, I, NewBoard):-
 	invalidInput('Invalid input', Board, Colour, I, NewBoard).
 
 playerMove(Board, X, Y, Piece, Colour, I, NewBoard):- 
 	getColour(Piece, PieceColour), 
 	playerMoveAux(Board, X, Y, Colour, I, NewBoard, Piece, PieceColour).
 
-playerMoveAux(Board, X, Y, Colour, I, NewBoard, Piece, PieceColour):- 
-	Colour = PieceColour,
 
-	valid_moves(Board, X, Y, Moves),
-	append([], [], Moves),
-
-	getHeight(Piece, Height),
-	Height > 1,
-
-	playerMove2(Board, Colour, X, Y, I, NewBoard).
-
-
-playerMoveAux(Board, X, Y, Colour, I, NewBoard, Piece, PieceColour):- 
+playerMoveAux(Board, _, _, Colour, I, NewBoard, _, PieceColour):- 
 	PieceColour \= '',
 	PieceColour \= Colour,
 	invalidInput('That piece belongs to the other player!', Board, Colour, I, NewBoard).
 
-playerMoveAux(Board, X, Y, Colour, I, NewBoard, Piece, PieceColour):- 
+playerMoveAux(Board, _, _, Colour, I, NewBoard, _, PieceColour):- 
 	PieceColour = '',
 	invalidInput('There is no piece at those coordinates!', Board, Colour, I, NewBoard).
 
-playerMoveAux(Board, X, Y, Colour, I, NewBoard, Piece, PieceColour):- 
+playerMoveAux(Board, _, _, Colour, I, NewBoard, Piece, _):- 
 	getHeight(Piece, Height),
 	Height = 1,
 	invalidInput('The stack must have more than one piece!', Board, Colour, I, NewBoard).
 
-playerMoveAux(Board, X, Y, Colour, I, NewBoard, Piece, PieceColour):- 
-	valid_moves(Board, X, Y, Moves),
-	append([], [], Moves),
+playerMoveAux(Board, X, Y, Colour, I, NewBoard, _, _):- 
+	getPieceMoves(Board, X, Y, Moves),
+	Moves = [],
 	invalidInput('That piece has no possible moves!', Board, Colour, I, NewBoard).
 
+
+playerMoveAux(Board, X, Y, Colour, I, NewBoard, _, PieceColour):- 
+	Colour = PieceColour,
+
+	playerMove2(Board, Colour, X, Y, I, NewBoard).
 
 
 
 playerMove2(Board, Colour, X1, Y1, I, NewBoard):-
-	valid_moves(Board, X1, Y1, Moves),
+	getPieceMoves(Board, X1, Y1, Moves),
 	showMoves(Board, Moves, BoardWithLetters),
 	printBoard(BoardWithLetters),nl,
 	write('Choose a position letter (or write ''Z'' to return to stack selector):'),nl,
@@ -305,7 +196,7 @@ playerMove2(Board, Colour, X1, Y1, I, NewBoard):-
 			playerMove2(Board, Colour, X1, Y1, I, NewBoard)).
 	
 
-playerMove3(Board, Colour, X1, Y1, Position, Moves, I, NewBoard):-
+playerMove3(Board, _, X1, Y1, Position, Moves, I, NewBoard):-
 	I \= 0,
 	nth0(Position, Moves, Move),
 	nth0(0, Move, X2),
@@ -315,7 +206,7 @@ playerMove3(Board, Colour, X1, Y1, Position, Moves, I, NewBoard):-
 	((N = 'Z', movePrompt(Board, I, NewBoard));
 	move(Board, X1, Y1, X2, Y2, N, NewBoard)).
 			
-playerMove3(Board, Colour, X1, Y1, Position, Moves, I, NewBoard):-
+playerMove3(Board, _, X1, Y1, Position, Moves, I, NewBoard):-
 	I = 0,
 	nth0(Position, Moves, Move),
 	nth0(0, Move, X2),
@@ -332,8 +223,6 @@ letter('F', 5).
 letter('G', 6).
 letter('H', 7).
 
-getLetter(I):-
-	I is Position.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
@@ -346,15 +235,19 @@ getLetter(I):-
 %gameLoopBotVsBot - Loop of the Computer Vs Computer game according to number of plays
 
 gameLoop:-
-	write('KNIGHT LINE '), nl,nl,nl,
 	I is 0,
 	initialBoard(Board),
 	gameLoop(Board, I).
 
 gameLoop(Board, I):-
 	printBoard(Board),nl,
-	%% checkWinnerMenu(Board),
 
+ 	gameLoop2(Board, I).
+
+gameLoop2(Board, _):-
+	checkGameOver(Board).
+
+gameLoop2(Board, I):-
 	movePrompt(Board, I, NewBoard),
 	I1 is I+1,
 	gameLoop(NewBoard, I1).
@@ -367,13 +260,11 @@ gameLoopPlayerVsBot:-
 
 gameLoopPlayerVsBot(Board, Difficulty, I):-
 	printBoard(Board),nl,
-	sleep(2),
 
- 	gameLoopBotVsBot2(Board, Difficulty, I).
+ 	gameLoopPlayerVsBot2(Board, Difficulty, I).
 
-gameLoopPlayerVsBot2(Board, Difficulty, I):-
-	game_over(Board, Winner),
-	gameOverMenu(Winner).
+gameLoopPlayerVsBot2(Board, _, _):-
+	checkGameOver(Board).
 
 gameLoopPlayerVsBot2(Board, Difficulty, I):-
 	P is mod(I, 2),
@@ -382,10 +273,11 @@ gameLoopPlayerVsBot2(Board, Difficulty, I):-
  	I1 is I+1,
 	gameLoopPlayerVsBot(NewBoard, Difficulty, I1).	
 
-gameLoopPlayerVsBot(Board, I, 0, Difficulty, NewBoard):-
+gameLoopPlayerVsBot(Board, I, 0, _, NewBoard):-
 	movePrompt(Board, I, NewBoard).
 
-gameLoopPlayerVsBot(Board, I, 1, Difficulty, NewBoard):-
+gameLoopPlayerVsBot(Board, I, 1, _, NewBoard):-
+	sleep(2),
 	moveBot(Board, I, 2, NewBoard).	
 	
 gameLoopBotVsBot:-
@@ -396,22 +288,23 @@ gameLoopBotVsBot:-
 
 gameLoopBotVsBot(Board, Difficulty, I):-
 	printBoard(Board),nl,
- 	sleep(2),
-
+ 	
  	gameLoopBotVsBot2(Board, Difficulty, I).
  	
 
+gameLoopBotVsBot2(Board, _, _):-
+	checkGameOver(Board).
 
-gameLoopBotVsBot2(Board, Difficulty, I):-
-	game_over(Board, Winner),
-	gameOverMenu(Winner).
-
-gameLoopBotVsBot2(Board, Difficulty, I):-
-	P is mod(I, 2),
+gameLoopBotVsBot2(Board, Difficulty, I):-	
+	sleep(2),
  	moveBot(Board, I, Difficulty, NewBoard),
- 	I1 is I+1,
+
+	I1 is I+1,
 	gameLoopBotVsBot(NewBoard, Difficulty, I1).	
 
+checkGameOver(Board):-
+	game_over(Board, Winner),
+	gameOverMenu(Winner).
 
 setDifficulty(Difficulty):-
 	write('Choose a difficulty:'),nl,

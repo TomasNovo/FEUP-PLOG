@@ -9,29 +9,29 @@ clear_console(N) :-
 	nl, N1 is N - 1, clear_console(N1).
 
 displayBar(Board):-
-	getBoardSize(Board, W, H),
+	getBoardSize(Board, W, _),
 	I is 1,
 	write('   ___'),
 	displayBar(Board, W, I).
 
-displayBar([H|T], Width, N) :-
+displayBar(Board, Width, N) :-
 	write('|___'),
 	(N1 is N + 1,
 	N1 @< Width,
-	displayBar([H|T], Width, N1);
+	displayBar(Board, Width, N1);
 	true).
 
 displayX(Board):-
-	getBoardSize(Board, W, H),
+	getBoardSize(Board, W, _),
 	I is 1,
 	write('    0 '),
 	displayX(Board, W, I).
 
-displayX([H|T], Width, N) :-
+displayX(Board, Width, N) :-
 	write('| '), write(N), write(' '),
 	(N1 is N + 1, 
 	N1 @< Width,
-	displayX([H|T], Width, N1);
+	displayX(Board, Width, N1);
 	true).
 
 alphabet([' A ', ' B ', ' C ', ' D ', ' E ', ' F ', ' G ', ' H ']).
@@ -102,7 +102,7 @@ printPieceColourAux(N, Colour):-
 
 print_line_aux([]):-
 	write('|'),nl.
-print_line_aux([H|T]):-
+print_line_aux([_|_]):-
 	write('|').
 
 print_line([]).
@@ -203,9 +203,7 @@ increaseBoardAux(Board, X, Y, Colour, NewBoard):-
 	increaseBoardAux2(List2, Y1, 2, List3),
 	increaseBoardAux2(List3, Y2, 3, NewBoard).
 
-increaseBoardAux(Board, X, Y, Colour, NewBoard):-
-	NewBoard = Board.
-
+increaseBoardAux(Board, _, _, _, Board).
 
 checkAdjacent2(Board, X, Y, Colour):-
 	
