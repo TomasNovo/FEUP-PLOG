@@ -62,6 +62,4 @@ cars2(L):-
 
 	quadruplets(L, 1),
 
-	%% Count #= 1,
-
 	labeling([], L).
