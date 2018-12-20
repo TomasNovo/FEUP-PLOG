@@ -11,36 +11,43 @@ draw_piece(H):- write(' '),write(H).
 
 
 
-print_line_aux([]):-
-	write(' |'),
-	displayBar,
-	write('|').
-print_line_aux([_|_]):-
+print_line_aux([], Hints, I):-
+	write(' | '),
+	I1 is I+9,
+	nth0(I1, Hints, Hint),
+	reverse(Hint, Hint2),
+	displayRightHints(Hint2),
+	displayBar.
+print_line_aux([_|_], _, _):-
 	write(' |').
 
 
-print_line([], _).
-print_line([H|T], I):-
+print_line([], _, _).
+print_line([H|T], Hints, I):-
 	draw_piece(H),
-	print_line_aux(T),
-	print_line(T, I).
+	print_line_aux(T, Hints, I),
+	print_line(T, Hints, I).
 
 
 
-printBoard([], _).
-printBoard([H|T], I) :-
-	%% printColumnNumber(I),
-	print_line(H, I),
+printBoard([], _, _).
+printBoard([H|T], Hints, I) :-
+	I2 is 35-I,
+	nth0(I2, Hints, Hint3),
+	fillHint(Hint3, Hint4),
+	displayRightHints(Hint4),
+	write('|'),
+	print_line(H, Hints, I),
 	I1 is I+1,
-	printBoard(T, I1).
+	printBoard(T, Hints, I1).
 
-printBoard(Board):-
+printBoard(Hints, Board):-
 	I is 0,
 	nl,nl,nl,
-	initialHints(Hints),
-	displayHints(Hints),
-	displayBar, write('|'),
-	printBoard(Board, I), !.
+	displayTopHints(Hints),
+	displayBar,
+	printBoard(Board, Hints, I),
+	displayBottomHints(Hints).
 
 
 
@@ -67,42 +74,84 @@ clear_console(N) :-
 
 
 displayBar:-
-	nl,write(' -----------------------------------'),nl.
+	nl,write('       -----------------------------------'),nl.
 
-displayHints(Hints):-
+displayTopHints(Hints):-
 	fillHints(Hints, Hints2),
-	displayHints(Hints2, 0).
+	displayTopHints(Hints2, 0),
+	!.
 
-displayHints(_, 3):-!.
-displayHints(Hints, I):-
-	write('  '),
-	displayHints(Hints, I, 0),
+displayTopHints(_, 3):-!.
+displayTopHints(Hints, 2):-
+	write('        '),
+	displayTopHints(Hints, 2, 0).
+
+
+
+displayTopHints(Hints, I):-
+	write('        '),
+	displayTopHints(Hints, I, 0),
 	nl,
 
 	I1 is I+1,
-	displayHints(Hints, I1).
+	displayTopHints(Hints, I1).
 
-displayHints(_, _, 9):-!.
-displayHints(Hints, I, I2):-
+displayTopHints(_, _, 9):-!.
+displayTopHints(Hints, I, I2):-
 	nth0(I2, Hints, Hint),
 	nth0(I, Hint, Element),
 
 	write(Element), write('   '),
 
 	I3 is I2+1,
-	displayHints(Hints, I, I3).
+	displayTopHints(Hints, I, I3).
 
-fillHints([], []).
+
+displayBottomHints(Hints):-
+	fillHints(Hints, Hints2),
+	displayBottomHints(Hints2, 0),
+	!.
+
+displayBottomHints(_, 3):-!.
+displayBottomHints(Hints, I):-
+	write('        '),
+	displayBottomHints(Hints, I, 0),
+	nl,
+
+	I1 is I+1,
+	displayBottomHints(Hints, I1).
+
+displayBottomHints(_, _, 9):-!.
+displayBottomHints(Hints, I, I2):-
+	I4 is 26-I2,
+	nth0(I4, Hints, Hint),
+	I5 is 2-I,
+	nth0(I5, Hint, Element),
+
+	write(Element), write('   '),
+
+	I3 is I2+1,
+	displayBottomHints(Hints, I, I3).
+
+fillHints([], []):-!.
 fillHints([H|T], [H2|T2]):-
-	fillHints2(H, H2, 0),
+	fillHint(H, H2),
+
 	fillHints(T, T2).
 
 
-fillHints2([], [], 3):-!.
-fillHints2([], [' '|T2], I):-
-	I1 is I+1,
-	fillHints2([], T2, I1).
+fillHint([A,B,C], [A,B,C]):-!.
+fillHint(List, Return):-
+	append([' '], List, List2),
+	fillHint(List2, Return).
 
-fillHints2([H|T], [H|T2], I):-
-	I1 is I+1,
-	fillHints2(T, T2, I1).
+
+displayleHints([]).
+displayLeftHints([H|T]):-
+	write(H),write(' '),
+	displayRightHints(T).
+
+displayRightHints([]).
+displayRightHints([H|T]):-
+	write(H),write(' '),
+	displayRightHints(T).

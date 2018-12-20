@@ -48,3 +48,13 @@ fillList(X, I, Row, Y):-
 	append(X, [Row], NewX),
 	I1 is I-1,
 	fillList(NewX, I1, Row, Y).
+
+
+
+cutLeftSide(List, X, List2):-
+	length(List, L),
+	L2 is L-X,
+	length(List2, L2),
+	length(List3, X),
+
+	append(List3, List2, List).
