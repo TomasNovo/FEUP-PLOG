@@ -15,8 +15,8 @@ initialBoard(	[
 
 
 initialHints([ 
-	[3,4,5],[8,9],[1,2],[1,3],[6,7],[5,6],[],[8,9],
-	[3,1],[],[5,4],[4,3],[7,5][9,8],[],[6,5,4],[2,1],
+	[3,4,5],[8,9],[1,2],[8,9],[1,3],[6,7],[5,6],[],[8,9],
+	[3,1],[],[5,4],[4,3],[7,5],[9,8],[],[6,5,4],[2,1],
 	[3,2],[9,1],[8,7],[5,4,3],[9,8],[7,6],[9,8],[3,2],[7,6],
 	[3,4],[],[1],[2,3,4],[6,8],[],[6,7],[5,8],[]
 	] ).
@@ -53,9 +53,9 @@ initialSelection(X):-
 	fillList(3, [], Y),
 	fillList(3, Y, X).
 
-getElement(Board, X, Y, Piece) :-
-	element(Y, Board, Line),
-	element(X, Line, Piece).
+getElement(Board, X, Y, Element) :-
+	nth1(Y, Board, Line),
+	element(X, Line, Element).
 
 
 getBoardSize([H|T], Width, Height):-
@@ -70,7 +70,7 @@ fillBoard(Board):-
 	fillBoardBox(Board),
 
 	initialHints(Hints),
-	fillHints(Board, Hints, 36),
+	fillHints(Board, Hints, 0),
 
 	recursiveLabeling(Board).
 
@@ -123,24 +123,28 @@ fillBoardBox(Board, X, Y, I, List, List2):-
 	X1 is X+mod(I1,3)+1,
 	Y1 is Y+div(I1,3),
 
-	write(X1),nl,write(Y1),nl,nl,
-
 	nth0(Y1, Board, Row),
 	element(X1, Row, A),
 	fillBoardBox(Board, X, Y, I1, [A|List], List2).
 
 
-fillHints(Board, [], 0).
+fillHints(Board, [], 36).
 fillHints(Board, [H|T], I):-
-	fillHint(Board, H, I),
+	getTriplet(Board, I, Triplet),
+	nth0(0, Triplet, A),
+	nth0(1, Triplet, C),
+	nth0(2, Triplet, B),
+	fillHint(Board, H, I, A, B, C),
 
-	I1 is I-1,
+	I1 is I+1,
 	fillHints(Board, T, I1).
 
-fillHint(Board, [], _).
-fillHint(Board, [H|T], I):-
-	
+fillHint(Board, [], _, _, _, _).
+fillHint(Board, [H|T], I, A, B, C):-
 
+	A #= H #\/ B #= H #\/ C #= H,
+
+	fillHint(Board, T, I, A, B, C).
 
 
 recursiveLabeling([]).
@@ -149,32 +153,47 @@ recursiveLabeling([H|T]):-
 	recursiveLabeling(T).
 
 
-getTriplet(Board, I):-
+getTriplet(Board, I, Triplet):-
 	A is mod(I,9),
 	B is div(I,9),
 
-	X is A,
-	Y is B,
+	getTriplet(Board, A, B, Triplet).
 
-getTriplet2(Board, I, A, B, List):-
-	B = 0,
+getTriplet(Board, A, 0, Triplet):-
 	Y = 1,
-	getElement(Board, A, B)
+	X is A+1,
 
-getTriplet2(Board, I, A, B, List):-
-	B = 1,
+	getElement(Board, X, 1, P1),
+	getElement(Board, X, 2, P2),
+	getElement(Board, X, 3, P3),
+	Triplet = [P1,P2,P3].
+
+getTriplet(Board, A, 1, Triplet):-
 	X = 9,
-	getElement(Board, A, B)
+	Y is A+1,
 
-getTriplet2(Board, I, A, B, List):-
-	B = 2,
+	getElement(Board, 9, Y, P1),
+	getElement(Board, 8, Y, P2),
+	getElement(Board, 7, Y, P3),
+	Triplet = [P1,P2,P3].
+
+getTriplet(Board, A, 2, Triplet):-
 	Y = 9,
-	getElement(Board, A, B)
+	X is 9-A,
 
-getTriplet2(Board, I, A, B, List):-
-	B = 3,
-	X = 0,
-	getElement(Board, A, B)
+	getElement(Board, X, 9, P1),
+	getElement(Board, X, 8, P2),
+	getElement(Board, X, 7, P3),
+	Triplet = [P1,P2,P3].
+
+getTriplet(Board, A, 3, Triplet):-
+	X = 1,
+	Y is 9-A,
+
+	getElement(Board, 1, Y, P1),
+	getElement(Board, 2, Y, P2),
+	getElement(Board, 3, Y, P3),
+	Triplet = [P1,P2,P3].
 
 
 check_valid_sudoku(Board):-
