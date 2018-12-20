@@ -128,7 +128,7 @@ fillBoardBox(Board, X, Y, I, List, List2):-
 	fillBoardBox(Board, X, Y, I1, [A|List], List2).
 
 
-fillHints(Board, [], 36).
+fillHints(_, [], 36).
 fillHints(Board, [H|T], I):-
 	getTriplet(Board, I, Triplet),
 	nth0(0, Triplet, A),
@@ -139,7 +139,7 @@ fillHints(Board, [H|T], I):-
 	I1 is I+1,
 	fillHints(Board, T, I1).
 
-fillHint(Board, [], _, _, _, _).
+fillHint(_, [], _, _, _, _).
 fillHint(Board, [H|T], I, A, B, C):-
 
 	A #= H #\/ B #= H #\/ C #= H,
@@ -160,7 +160,6 @@ getTriplet(Board, I, Triplet):-
 	getTriplet(Board, A, B, Triplet).
 
 getTriplet(Board, A, 0, Triplet):-
-	Y = 1,
 	X is A+1,
 
 	getElement(Board, X, 1, P1),
@@ -169,7 +168,6 @@ getTriplet(Board, A, 0, Triplet):-
 	Triplet = [P1,P2,P3].
 
 getTriplet(Board, A, 1, Triplet):-
-	X = 9,
 	Y is A+1,
 
 	getElement(Board, 9, Y, P1),
@@ -178,7 +176,6 @@ getTriplet(Board, A, 1, Triplet):-
 	Triplet = [P1,P2,P3].
 
 getTriplet(Board, A, 2, Triplet):-
-	Y = 9,
 	X is 9-A,
 
 	getElement(Board, X, 9, P1),
@@ -187,7 +184,6 @@ getTriplet(Board, A, 2, Triplet):-
 	Triplet = [P1,P2,P3].
 
 getTriplet(Board, A, 3, Triplet):-
-	X = 1,
 	Y is 9-A,
 
 	getElement(Board, 1, Y, P1),
