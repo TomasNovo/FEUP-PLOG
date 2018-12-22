@@ -68,6 +68,14 @@ getBoardSize([H|T], Width, Height):-
 	length([H|T], Height),
 	length(H, Width).
 
+reset_timer :- statistics(walltime,_).	
+print_time :-
+	statistics(walltime,[_,T]),
+	TS is ((T//10)*10)/1000,
+	nl, write('Time: '), write(TS), write('s'), nl, nl.
+
+
+
 
 fillBoard(Hints, Board):-
 	length(Board, 9),
@@ -77,7 +85,10 @@ fillBoard(Hints, Board):-
 
 	fillHints(Board, Hints, 0),
 
-	recursiveLabeling(Board).
+	reset_timer,
+	recursiveLabeling(Board),
+	print_time,
+	fd_statistics.
 
 
 fillBoardHorizontal([]).

@@ -6,7 +6,7 @@
 
 
 
-draw_piece([]):- write(' _').
+draw_piece([]):- write('  ').
 draw_piece(H):- write(' '),write(H).
 
 
@@ -46,7 +46,7 @@ printBoard(Hints, Board):-
 	nl,nl,nl,
 	displayTopHints(Hints),
 	displayBar,
-	printBoard(Board, Hints, I),
+	printBoard(Board, Hints, I),!,
 	displayBottomHints(Hints).
 
 
