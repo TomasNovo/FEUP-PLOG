@@ -21,7 +21,7 @@ It will win the color that has 4 adjacent pieces in four adjacent tiles in any d
       
 • User can play versus another player, versus a bot or watch two bots play.
 Instructions to play: 
-![Instructions](https://github.com/TomasNovo/FEUP-PLOG1819/blob/master/Part1/images%20md/instructions.png)  
+![Instructions](https://github.com/TomasNovo/FEUP-PLOG1819/blob/master/Part1/images%20md/instructions.png)   
   
     
       
@@ -29,7 +29,7 @@ Instructions to play:
 • The game starts with the two adjacent stacks and user inputs the X and Y of 
 the stack that he wants to move. But on the 1st move, **user can only move 1 piece**.
 
-![PlayOne](https://github.com/TomasNovo/FEUP-PLOG1819/blob/master/Part1/images%20md/1st%20play.png)  
+![PlayOne](https://github.com/TomasNovo/FEUP-PLOG1819/blob/master/Part1/images%20md/1st%20play.png)   
     
     
   
@@ -54,13 +54,27 @@ has to input the move like for example: 'A'.
   
 
 • On following plays, users have to choose the number of pieces of the stack they want to move.  
+![MoveMore](https://github.com/TomasNovo/FEUP-PLOG1819/blob/master/Part1/images%20md/MoveMore.png)  
+  
 
+• After the input, the pieces are moved to desired tile.  
+![Donee](https://github.com/TomasNovo/FEUP-PLOG1819/blob/master/Part1/images%20md/Done.png)  
   
-  
-      
+    
     
   
 
 ## 2.	Outside Sudoku
 
-Outside 
+In the 2nd project of PLOG, we had to implement a game applying restrictions. We
+choosed Outside Sudoku. 
+This game is similar to the traditional Sudoku game but it has no hints on the inside. 
+The hints are outside the board. They are numbers, and there can be one to three numbers per
+row or column. These numbers adjacent to a column or row say that those numbers appear on the first three cells.  
+For example: 
+
+(IMAGE)
+
+In the first column, we see "3 4 5" and that means that on that direction, the first three cells contain that numbers, he just dont know which one, and that is the purpose of this project: **to solve the game applying restrictions**.
+
+(I)
