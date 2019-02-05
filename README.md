@@ -73,8 +73,11 @@ The hints are outside the board. They are numbers, and there can be one to three
 row or column. These numbers adjacent to a column or row say that those numbers appear on the first three cells.  
 For example: 
 
-(IMAGE)
+![Empty](https://github.com/TomasNovo/FEUP-PLOG1819/blob/master/Part2/imagens%20md/empty.png)
 
 In the first column, we see "3 4 5" and that means that on that direction, the first three cells contain that numbers, he just dont know which one, and that is the purpose of this project: **to solve the game applying restrictions**.
 
-(I)
+![Filled](https://github.com/TomasNovo/FEUP-PLOG1819/blob/master/Part2/imagens%20md/filled.png)  
+
+User can change the hints by creating new list of lists containing the hints.
+
