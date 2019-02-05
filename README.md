@@ -61,6 +61,8 @@ has to input the move like for example: 'A'.
 ![Donee](https://github.com/TomasNovo/FEUP-PLOG1819/blob/master/Part1/images%20md/Done.png)  
   
     
+  This game was implemented with graphic interface on LAIG at FEUP 2018/19.
+  Acess here: https://github.com/pedrofixe/LAIG
     
   
 
