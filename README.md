@@ -13,7 +13,7 @@ The stack can only me moved in L and has to have another stack adjacent to it.
 It will win the color that has 4 adjacent pieces in four adjacent tiles in any direction.
 
 
-• Using the interface, the user can choose the type of game he wants to play.
+• Using the interface, the user can choose the type of game he wants to play.  
 ![Menu](https://github.com/TomasNovo/FEUP-PLOG1819/blob/master/Part1/images%20md/menu.png)  
   
   
